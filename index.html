@@ -1,725 +1,1097 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LKPD Interaktif Informatika - Pengolahan Data Excel Dasar</title>
-  
-  <!-- Bootstrap 5 CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- FontAwesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- html2pdf.js Library -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <!-- Bootstrap 5 JS Bundle -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-  <style>
-    :root {
-      --excel-green: #107c41;
-      --excel-dark: #0b552c;
-      --excel-light: #f1f8f4;
-    }
-
-    body {
-      background-color: #eef2f5;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      color: #333;
-      padding-bottom: 80px;
-    }
-
-    .main-container {
-      max-width: 960px;
-      margin: 24px auto;
-      background: #ffffff;
-      border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-      padding: 32px;
-    }
-
-    /* Header Banner Original */
-    .header-banner {
-      background: linear-gradient(135deg, var(--excel-green), var(--excel-dark));
-      color: white;
-      padding: 28px;
-      border-radius: 12px;
-      margin-bottom: 28px;
-      box-shadow: 0 4px 14px rgba(16, 124, 65, 0.25);
-    }
-
-    .card-activity {
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      margin-bottom: 28px;
-      background: #ffffff;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-      overflow: hidden;
-    }
-
-    .card-activity .card-header {
-      background-color: var(--excel-light);
-      border-bottom: 2px solid #d0e7d8;
-      font-weight: 700;
-      color: var(--excel-dark);
-      padding: 16px 24px;
-    }
-
-    /* Spreadsheet Simulator */
-    .excel-table-container {
-      overflow-x: auto;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      margin: 16px 0;
-    }
-
-    .excel-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-      background: white;
-    }
-
-    .excel-table th, .excel-table td {
-      border: 1px solid #cbd5e1;
-      padding: 10px 14px;
-      text-align: center;
-    }
-
-    .excel-table th {
-      background-color: #f1f5f9;
-      color: #475569;
-      font-weight: 700;
-    }
-
-    .excel-table th.row-header {
-      background-color: #e2e8f0;
-      width: 45px;
-    }
-
-    .excel-cell-target {
-      background-color: #fef9c3;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-weight: 600;
-    }
-
-    .excel-cell-target.active {
-      outline: 2px solid var(--excel-green);
-      background-color: #dcfce7 !important;
-    }
-
-    .formula-bar-container {
-      display: flex;
-      align-items: center;
-      background: #f8fafc;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      padding: 8px 16px;
-      margin-bottom: 16px;
-    }
-
-    .formula-fx {
-      font-weight: 800;
-      font-style: italic;
-      color: var(--excel-green);
-      margin-right: 14px;
-      font-size: 18px;
-    }
-
-    .formula-input {
-      font-family: 'Consolas', 'Courier New', monospace;
-      font-weight: 700;
-    }
-
-    .formula-tag-print {
-      display: block;
-      font-size: 11px;
-      font-family: 'Consolas', monospace;
-      color: #166534;
-      background: #dcfce7;
-      border-radius: 4px;
-      padding: 2px 6px;
-      margin-top: 4px;
-      font-weight: normal;
-    }
-
-    .reflection-emoji {
-      font-size: 32px;
-      cursor: pointer;
-      filter: grayscale(80%);
-      transition: transform 0.2s, filter 0.2s;
-    }
-
-    .reflection-emoji:hover, .reflection-emoji.selected {
-      filter: grayscale(0%);
-      transform: scale(1.25);
-    }
-
-    /* Floating Action Bar */
-    .action-bar-bottom {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 90%;
-      max-width: 900px;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
-      border: 1px solid #bbf7d0;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-      padding: 14px 28px;
-      border-radius: 50px;
-      z-index: 1000;
-    }
-
-    /* SPECIFIC PRINT / PDF FORMATTING RULES */
-    body.pdf-export-mode {
-      background: #ffffff !important;
-      padding: 0 !important;
-    }
-
-    body.pdf-export-mode .main-container {
-      box-shadow: none !important;
-      max-width: 100% !important;
-      padding: 0 !important;
-      margin: 0 !important;
-    }
-
-    body.pdf-export-mode .no-pdf,
-    body.pdf-export-mode .action-bar-bottom,
-    body.pdf-export-mode .formula-bar-container,
-    body.pdf-export-mode button,
-    body.pdf-export-mode .btn {
-      display: none !important;
-    }
-
-    body.pdf-export-mode .card-activity {
-      break-inside: avoid !important;
-      page-break-inside: avoid !important;
-      margin-bottom: 20px !important;
-      border: 1px solid #cbd5e1 !important;
-    }
-
-    body.pdf-export-mode input[type="text"],
-    body.pdf-export-mode input[type="date"],
-    body.pdf-export-mode textarea {
-      border: none !important;
-      border-bottom: 1px dashed #64748b !important;
-      background: transparent !important;
-      padding: 4px 0 !important;
-      border-radius: 0 !important;
-      box-shadow: none !important;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LKPD Interaktif Informatika - Pengenalan Excel Dasar</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .excel-table th, .excel-table td { border: 1px solid #cbd5e1; }
+        .cell-editable { background-color: #ffffff; cursor: pointer; transition: all 0.15s ease; }
+        .cell-editable:hover { background-color: #f0f9ff; }
+        .cell-editable.active { outline: 2px solid #0284c7; outline-offset: -2px; background-color: #e0f2fe !important; }
+        .cell-correct { background-color: #dcfce7 !important; border-color: #86efac !important; color: #166534; }
+        .cell-incorrect { background-color: #fee2e2 !important; border-color: #fca5a5 !important; color: #991b1b; }
+        .emoji-btn { filter: grayscale(100%); transition: transform 0.2s, filter 0.2s; }
+        .emoji-btn.selected, .emoji-btn:hover { filter: grayscale(0%); transform: scale(1.2); }
+        
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; padding: 0 !important; margin: 0 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            .print-shadow { box-shadow: none !important; border: 1px solid #cbd5e1 !important; }
+            .print-break-inside-avoid { break-inside: avoid; page-break-inside: avoid; }
+            
+            input[type="text"], input[type="date"], textarea, select {
+                border: 1px solid #94a3b8 !important;
+                background-color: #f8fafc !important;
+                color: #0f172a !important;
+                font-weight: 600 !important;
+            }
+            .cell-editable {
+                border: 1px solid #cbd5e1 !important;
+                padding: 6px !important;
+            }
+            .print-formula-tag {
+                display: inline-block !important;
+                color: #0369a1 !important;
+                background-color: #f0f9ff !important;
+                border: 1px solid #bae6fd !important;
+                font-weight: bold !important;
+            }
+        }
+    </style>
 </head>
-<body>
+<body class="p-3 md:p-8 text-slate-800 pb-28">
 
-<div class="container main-container" id="lkpd-container">
-  
-  <!-- Header Banner Original -->
-  <div class="header-banner">
-    <div class="d-flex justify-content-between align-items-center mb-2">
-      <span class="badge bg-light text-success fw-bold px-3 py-2">INFORMATIKA SMA FASE E</span>
-      <div class="no-pdf">
-        <button class="btn btn-sm btn-outline-light me-2" onclick="openDriveModal()"><i class="fa-solid fa-gear me-1"></i> Pengaturan Drive</button>
-        <button class="btn btn-sm btn-light text-success fw-bold" onclick="resetForm()"><i class="fa-solid fa-rotate-left me-1"></i> Reset</button>
-      </div>
-    </div>
-    <h2 class="fw-bold m-0"><i class="fa-regular fa-file-excel me-2"></i>LKPD Interaktif: Formula & Rumus Dasar Excel</h2>
-    <p class="m-0 mt-2 opacity-90"><i class="fa-solid fa-bookmark me-1"></i> Elemen: Analisis Data (AD) | Topik: Aturan Emas Excel, SUM, AVERAGE, MAX, & MIN</p>
-  </div>
+    <div class="max-w-6xl mx-auto space-y-6">
 
-  <!-- Identitas Peserta Didik -->
-  <div class="card card-activity p-4">
-    <div class="row g-3">
-      <div class="col-md-6">
-        <label class="form-label fw-bold"><i class="fa-solid fa-user text-primary me-1"></i> Nama Lengkap Siswa:</label>
-        <input type="text" class="form-control" id="studentName" placeholder="Ketik nama lengkap Anda...">
-      </div>
-      <div class="col-md-6">
-        <label class="form-label fw-bold"><i class="fa-solid fa-users text-primary me-1"></i> Kelas:</label>
-        <input type="text" class="form-control" id="studentClass" placeholder="Contoh: X.1 / X.2">
-      </div>
-      <div class="col-md-6">
-        <label class="form-label fw-bold"><i class="fa-solid fa-desktop text-primary me-1"></i> No. Komputer / Lab:</label>
-        <input type="text" class="form-control" id="pcNumber" placeholder="Contoh: LAB-05">
-      </div>
-      <div class="col-md-6">
-        <label class="form-label fw-bold"><i class="fa-solid fa-calendar-day text-primary me-1"></i> Tanggal Praktikum:</label>
-        <input type="date" class="form-control" id="pracDate">
-      </div>
-    </div>
-  </div>
+        <!-- HEADER & IDENTITAS SISWA -->
+        <header class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 md:p-6 print-shadow">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 pb-6 border-b border-slate-100">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="bg-emerald-100 text-emerald-800 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
+                            Informatika SMA Fase E
+                        </span>
+                        <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-1 rounded-full">
+                            Tingkat Dasar (Pemula)
+                        </span>
+                    </div>
+                    <h1 class="text-2xl font-bold text-slate-900 mt-2">LKPD Interaktif: Pengenalan Formula & Rumus Dasar Excel</h1>
+                    <p class="text-slate-500 text-sm mt-1">Elemen: Analisis Data (AD) — Topik: Aturan Emas Excel, SUM, AVERAGE, MAX, & MIN</p>
+                </div>
+                <div class="no-print flex flex-wrap gap-2">
+                    <button onclick="toggleDriveModal()" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3.5 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2 border border-emerald-200">
+                        <i class="fa-brands fa-google-drive text-emerald-600"></i> Pengaturan Drive
+                    </button>
+                    <button onclick="toggleHelpModal()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 px-3.5 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2">
+                        <i class="fa-solid fa-circle-question"></i> Panduan Rumus
+                    </button>
+                    <button onclick="openResetModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-3.5 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2">
+                        <i class="fa-solid fa-rotate-left"></i> Reset
+                    </button>
+                </div>
+            </div>
 
-  <!-- AKTIVITAS 1 -->
-  <div class="card card-activity">
-    <div class="card-header d-flex justify-content-between align-items-center">
-      <span><i class="fa-solid fa-flask me-2 text-success"></i>Aktivitas 1: Uji Coba "Aturan Emas Excel"</span>
-      <span class="badge bg-success">Bobot: 10 Poin</span>
-    </div>
-    <div class="card-body">
-      <p class="text-muted small mb-3">Cobalah mengetik eksperimen di bawah ini pada Excel untuk memahami perbedaan teks biasa dengan formula.</p>
-      
-      <div class="table-responsive">
-        <table class="table table-bordered align-middle">
-          <thead class="table-light">
-            <tr>
-              <th>Percobaan Input</th>
-              <th>Hasil Tampilan Excel</th>
-              <th>Analisis Sistem Excel</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><code>10+5</code> (Tanpa tanda <code>=</code>)</td>
-              <td><span class="badge bg-secondary">10+5</span></td>
-              <td class="small text-muted">Dianggap sebagai <b>Teks Biasa</b>.</td>
-            </tr>
-            <tr>
-              <td><code>=10+5</code> (Diawali tanda <code>=</code>)</td>
-              <td><span class="badge bg-success">15</span></td>
-              <td class="small text-success fw-bold">Dihitung otomatis sebagai <b>Formula</b>.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+            <!-- Form Identitas Siswa -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Nama Siswa</label>
+                    <input type="text" id="studentName" placeholder="Ketik nama lengkap..." class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Kelas</label>
+                    <input type="text" id="studentClass" placeholder="Contoh: X-1 / X IPA 2" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">No. Komputer / Lab</label>
+                    <input type="text" id="studentPC" placeholder="Contoh: LAB-05" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Tanggal Praktikum</label>
+                    <input type="date" id="praktikumDate" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                </div>
+            </div>
+        </header>
 
-      <div class="mt-3">
-        <label class="form-label fw-bold">Kesimpulan Anda: Tanda sama dengan (=) pada Excel berfungsi untuk...</label>
-        <textarea class="form-control" id="act1_conclusion" rows="2" placeholder="Tuliskan kesimpulan Anda di sini..."></textarea>
-      </div>
-    </div>
-  </div>
+        <!-- AKTIVITAS 1: ATURAN EMAS EXCEL SIMULATION -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 md:p-6 print-shadow">
+            <div class="flex items-center gap-3 mb-4 border-b pb-3">
+                <div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-sm">A</div>
+                <div>
+                    <h2 class="text-base font-bold text-slate-800">Aktivitas 1: Uji Coba "Aturan Emas Excel"</h2>
+                    <p class="text-xs text-slate-500">Cobalah mengetik eksperimen di bawah ini untuk memahami perbedaan teks biasa dengan rumus Excel.</p>
+                </div>
+            </div>
 
-  <!-- AKTIVITAS 2 -->
-  <div class="card card-activity">
-    <div class="card-header d-flex justify-content-between align-items-center">
-      <span><i class="fa-solid fa-table-cells me-2 text-success"></i>Aktivitas 2: Simulation Spreadsheet Rekapitulasi Nilai</span>
-      <span class="badge bg-success">Bobot: 50 Poin</span>
-    </div>
-    <div class="card-body">
-      <p class="text-muted small">Pilih sel target (berwarna kuning), ketik rumus di Formula Bar, lalu klik tombol <b>"Cek Sintaks Sel Ini"</b> untuk memverifikasi rumus per sel secara langsung!</p>
-      
-      <!-- Formula Bar -->
-      <div class="formula-bar-container no-pdf">
-        <span class="formula-fx">fx</span>
-        <span class="badge bg-dark me-2" id="activeCellLabel">E4</span>
-        <input type="text" class="form-control formula-input me-2" id="formulaInput" placeholder="Ketik rumus di sini (Contoh: =C4+D4)..." onkeyup="handleFormulaTyping(event)">
-        <button class="btn btn-sm btn-outline-success fw-bold text-nowrap me-1" onclick="checkActiveCellSyntax()"><i class="fa-solid fa-circle-check me-1"></i> Cek Sintaks Sel Ini</button>
-        <button class="btn btn-sm btn-outline-primary text-nowrap" onclick="applyAutoFill()"><i class="fa-solid fa-arrows-down-to-line me-1"></i> Auto-Fill (E4:E7)</button>
-      </div>
-      <div id="syntaxFeedback" class="mb-3 no-pdf"></div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <!-- Percobaan 1 -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+                    <label class="block text-xs font-bold text-slate-700">1. Cobalah mengetik angka tanpa sama dengan (=):</label>
+                    <div class="flex items-center gap-2">
+                        <input type="text" id="expInput1" value="10 + 5" placeholder="Ketik 10 + 5" oninput="runExp1()" class="flex-1 font-mono text-sm border border-slate-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                        <span class="text-slate-400 font-bold">➔</span>
+                        <div id="expResult1" class="w-28 font-mono text-center bg-white border border-slate-300 px-3 py-1.5 rounded-lg font-bold text-slate-700">10 + 5</div>
+                    </div>
+                    <p class="text-[11px] text-slate-500 italic"><i class="fa-solid fa-circle-info text-amber-500 mr-1"></i>Excel menganggap tulisan ini sebagai <b>Teks Biasa</b>.</p>
+                </div>
 
-      <!-- Simulator Spreadsheet -->
-      <div class="excel-table-container">
-        <table class="excel-table">
-          <thead>
-            <tr>
-              <th class="row-header"></th>
-              <th>A</th>
-              <th>B</th>
-              <th>C</th>
-              <th>D</th>
-              <th>E</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="row-header">3</td>
-              <td class="fw-bold">No</td>
-              <td class="fw-bold">Nama Siswa</td>
-              <td class="fw-bold">Nilai UH 1</td>
-              <td class="fw-bold">Nilai UH 2</td>
-              <td class="fw-bold">Total Nilai</td>
-            </tr>
-            <tr>
-              <td class="row-header">4</td>
-              <td>1</td>
-              <td>Andi</td>
-              <td>70</td>
-              <td>80</td>
-              <td class="excel-cell-target active" id="cell_E4" onclick="selectCell('E4')"><span class="cell-val">-</span><div class="cell-tag"></div></td>
-            </tr>
-            <tr>
-              <td class="row-header">5</td>
-              <td>2</td>
-              <td>Budi</td>
-              <td>85</td>
-              <td>90</td>
-              <td class="excel-cell-target" id="cell_E5" onclick="selectCell('E5')"><span class="cell-val">-</span><div class="cell-tag"></div></td>
-            </tr>
-            <tr>
-              <td class="row-header">6</td>
-              <td>3</td>
-              <td>Citra</td>
-              <td>60</td>
-              <td>75</td>
-              <td class="excel-cell-target" id="cell_E6" onclick="selectCell('E6')"><span class="cell-val">-</span><div class="cell-tag"></div></td>
-            </tr>
-            <tr>
-              <td class="row-header">7</td>
-              <td>4</td>
-              <td>Dewi</td>
-              <td>90</td>
-              <td>95</td>
-              <td class="excel-cell-target" id="cell_E7" onclick="selectCell('E7')"><span class="cell-val">-</span><div class="cell-tag"></div></td>
-            </tr>
-            <tr>
-              <td class="row-header">8</td>
-              <td colspan="2" class="fw-bold text-start ps-3">Rata-Rata Kelas</td>
-              <td class="excel-cell-target" id="cell_C8" onclick="selectCell('C8')"><span class="cell-val">-</span><div class="cell-tag"></div></td>
-              <td class="excel-cell-target" id="cell_D8" onclick="selectCell('D8')"><span class="cell-val">-</span><div class="cell-tag"></div></td>
-              <td class="bg-light"></td>
-            </tr>
-            <tr>
-              <td class="row-header">9</td>
-              <td colspan="2" class="fw-bold text-start ps-3">Nilai Tertinggi</td>
-              <td class="excel-cell-target" id="cell_C9" onclick="selectCell('C9')"><span class="cell-val">-</span><div class="cell-tag"></div></td>
-              <td class="excel-cell-target" id="cell_D9" onclick="selectCell('D9')"><span class="cell-val">-</span><div class="cell-tag"></div></td>
-              <td class="bg-light"></td>
-            </tr>
-            <tr>
-              <td class="row-header">10</td>
-              <td colspan="2" class="fw-bold text-start ps-3">Nilai Terendah</td>
-              <td class="excel-cell-target" id="cell_C10" onclick="selectCell('C10')"><span class="cell-val">-</span><div class="cell-tag"></div></td>
-              <td class="excel-cell-target" id="cell_D10" onclick="selectCell('D10')"><span class="cell-val">-</span><div class="cell-tag"></div></td>
-              <td class="bg-light"></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
+                <!-- Percobaan 2 -->
+                <div class="bg-emerald-50/60 p-4 rounded-xl border border-emerald-200 space-y-2">
+                    <label class="block text-xs font-bold text-emerald-900">2. Cobalah diawali dengan tanda sama dengan (=):</label>
+                    <div class="flex items-center gap-2">
+                        <input type="text" id="expInput2" value="=10 + 5" placeholder="Ketik =10 + 5" oninput="runExp2()" class="flex-1 font-mono text-sm border border-emerald-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        <span class="text-emerald-500 font-bold">➔</span>
+                        <div id="expResult2" class="w-28 font-mono text-center bg-white border border-emerald-400 px-3 py-1.5 rounded-lg font-extrabold text-emerald-700">15</div>
+                    </div>
+                    <p class="text-[11px] text-emerald-700 italic"><i class="fa-solid fa-circle-check text-emerald-600 mr-1"></i>Excel menghitung otomatis karena diawali tanda <b>=</b>!</p>
+                </div>
+            </div>
 
-  <!-- AKTIVITAS 3 -->
-  <div class="card card-activity">
-    <div class="card-header d-flex justify-content-between align-items-center">
-      <span><i class="fa-solid fa-bug me-2 text-danger"></i>Aktivitas 3: Detektif Error Excel (Menganalisis Rumus)</span>
-      <span class="badge bg-success">Bobot: 20 Poin</span>
-    </div>
-    <div class="card-body">
-      <div class="mb-3 p-3 bg-light rounded border">
-        <label class="form-label fw-bold">1. Budi mengetik rumus <code>=AVERAGE(C4-C7)</code> untuk menghitung rata-rata nilai, tetapi hasilnya Error. Di mana letak kesalahannya dan bagaimana penulisan rumus yang benar?</label>
-        <textarea class="form-control" id="act3_q1" rows="2" placeholder="Tuliskan analisis kesalahan dan rumus yang benar..."></textarea>
-      </div>
+            <!-- Pertanyaan Kesimpulan -->
+            <div class="bg-amber-50/50 p-4 rounded-xl border border-amber-200 text-xs space-y-2">
+                <label for="goldRuleAnswer" class="font-semibold text-amber-900 block">
+                    <i class="fa-solid fa-lightbulb text-amber-600 mr-1"></i> Kesimpulan Anda: Tanda sama dengan (<code>=</code>) pada Excel berfungsi untuk...
+                </label>
+                <input type="text" id="goldRuleAnswer" placeholder="Tuliskan kesimpulan singkat Anda di sini..." class="w-full border border-amber-300 rounded-lg p-2.5 bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500">
+            </div>
+        </section>
 
-      <div class="p-3 bg-light rounded border">
-        <label class="form-label fw-bold">2. Jika nilai UH 1 Andi (sel C4) diubah dari 70 menjadi 100, apa yang terjadi pada hasil sel Total Nilai (E4)? Jelaskan alasannya!</label>
-        <textarea class="form-control" id="act3_q2" rows="2" placeholder="Jelaskan perubahan yang terjadi dan alasannya..."></textarea>
-      </div>
-    </div>
-  </div>
+        <!-- AKTIVITAS 2: SPREADSHEET SIMULATOR & CEK SINTAKS PER SEL -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden print-shadow">
+            <div class="p-5 bg-slate-800 text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center font-bold text-sm">B</div>
+                    <div>
+                        <h2 class="text-base font-bold flex items-center gap-2">
+                            <i class="fa-solid fa-file-excel text-emerald-400"></i> Aktivitas 2: Kasus Rekapitulasi Nilai Ulangan Harian
+                        </h2>
+                        <p class="text-xs text-slate-300">Pilih sel target, ketik rumus di Formula Bar, lalu Anda bisa menguji sintaks satu per satu!</p>
+                    </div>
+                </div>
+                <span class="text-xs bg-slate-700 px-3 py-1 rounded-full text-slate-300">Target Sel: E4:E7, C8:D10</span>
+            </div>
 
-  <!-- REFLEKSI SISWA -->
-  <div class="card card-activity">
-    <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
-      <span><i class="fa-solid fa-heart-pulse me-2"></i>Jurnal Refleksi Pemahaman Siswa</span>
-      <span class="badge bg-light text-primary">Bobot: 20 Poin</span>
-    </div>
-    <div class="card-body">
-      <div class="text-center mb-4">
-        <label class="form-label fw-bold d-block mb-2">Tingkat Pemahaman Pembelajaran Hari Ini:</label>
-        <div class="d-flex justify-content-center gap-4 align-items-center">
-          <span class="reflection-emoji" onclick="setRating(1, this)" title="Sangat Bingung">😠</span>
-          <span class="reflection-emoji" onclick="setRating(2, this)" title="Kurang Paham">🙁</span>
-          <span class="reflection-emoji selected" onclick="setRating(3, this)" title="Cukup Paham">😐</span>
-          <span class="reflection-emoji" onclick="setRating(4, this)" title="Paham">🙂</span>
-          <span class="reflection-emoji" onclick="setRating(5, this)" title="Sangat Menguasai">🤩</span>
+            <!-- FORMULA BAR INTERAKTIF DENGAN CEK PER SEL -->
+            <div class="no-print bg-slate-100 border-b border-slate-300 p-3 flex flex-col gap-2">
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                    <div class="flex items-center gap-2">
+                        <div class="bg-white border border-slate-300 font-mono text-xs font-bold px-3 py-2 rounded-lg text-slate-700 min-w-[65px] text-center shadow-sm" id="activeCellLabel">
+                            E4
+                        </div>
+                        <div class="text-slate-400 font-bold italic text-base px-1">fx</div>
+                    </div>
+                    
+                    <!-- Input Formula Bar -->
+                    <input type="text" id="formulaBar" placeholder="Pilih sel di tabel, lalu ketik rumus di sini (diawali tanda =)..." class="flex-1 font-mono text-sm bg-white border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none shadow-sm" oninput="updateActiveCellValue(this.value)">
+                    
+                    <!-- Tombol Cek Per Sel & AutoFill -->
+                    <div class="flex gap-2">
+                        <button onclick="checkSingleCellSyntax()" class="bg-sky-600 hover:bg-sky-700 text-white px-3.5 py-2 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow-sm" title="Uji sintaks sel aktif saat ini">
+                            <i class="fa-solid fa-vial-circle-check"></i> Cek Sintaks Sel Ini
+                        </button>
+                        <button onclick="autoFillTotal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-lg text-xs font-semibold transition flex items-center gap-1.5 shadow-sm" title="Simulasi Auto-Fill dari sel E4">
+                            <i class="fa-solid fa-arrows-down-to-line"></i> Auto-Fill (E4➔E7)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Status Feedback Live Per Sel -->
+                <div id="cellFeedbackToast" class="hidden items-center justify-between p-2 rounded-lg text-xs font-medium transition-all">
+                    <span id="cellFeedbackText" class="flex items-center gap-2"></span>
+                    <button onclick="hideCellFeedback()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            </div>
+
+            <!-- TABLE SPREADSHEET -->
+            <div class="overflow-x-auto p-4">
+                <table class="w-full text-sm text-left border-collapse excel-table font-sans">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-600 text-xs font-bold text-center">
+                            <th class="p-2 w-12 bg-slate-200 border-r"></th>
+                            <th class="p-2 w-12">A</th>
+                            <th class="p-2 min-w-[160px]">B</th>
+                            <th class="p-2 w-32 bg-sky-50 text-sky-800">C</th>
+                            <th class="p-2 w-32 bg-sky-50 text-sky-800">D</th>
+                            <th class="p-2 w-36 bg-emerald-50 text-emerald-800">E</th>
+                        </tr>
+                        <tr class="bg-slate-50 font-semibold text-slate-700 text-center border-b">
+                            <td class="p-2 bg-slate-200 font-mono text-xs text-slate-500">3</td>
+                            <td class="p-2">No</td>
+                            <td class="p-2 text-left">Nama Siswa</td>
+                            <td class="p-2 bg-sky-50">Nilai UH 1</td>
+                            <td class="p-2 bg-sky-50">Nilai UH 2</td>
+                            <td class="p-2 bg-emerald-50 text-emerald-900 font-bold">Total Nilai</td>
+                        </tr>
+                    </thead>
+                    <tbody id="spreadsheetBody">
+                        <!-- Data Rows Generated via JS -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="px-5 pb-4 text-xs text-slate-500 flex flex-wrap justify-between items-center gap-2">
+                <span><i class="fa-solid fa-circle-info text-sky-500 mr-1"></i> Klik sel berwarna (E4:E7, C8:D10) lalu klik <b>"Cek Sintaks Sel Ini"</b> untuk menguji rumus satu per satu.</span>
+                <span class="italic text-slate-400">*Ganti angka UH1/UH2 untuk melihat sifat kalkulasi dinamis Excel!</span>
+            </div>
+        </section>
+
+        <!-- AKTIVITAS 3: DETEKTIF ERROR EXCEL & TANTANGAN KONSEPTUAL -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 md:p-6 print-shadow">
+            <div class="flex items-center gap-3 mb-4 border-b pb-3">
+                <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm">C</div>
+                <div>
+                    <h2 class="text-base font-bold text-slate-800">Aktivitas 3: Detektif Error Excel & Tantangan Rumus</h2>
+                    <p class="text-xs text-slate-500">Temukan kesalahan sintaks pada penulisan rumus di bawah ini dan perbaiki agar Excel tidak error!</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                <!-- Soal 1 Detektif Error -->
+                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-slate-700">1. Kasus Kasir Toko:</span>
+                        <span class="bg-rose-100 text-rose-800 text-[10px] px-2 py-0.5 rounded font-mono font-semibold">Teks Biasa (Bukan Rumus)</span>
+                    </div>
+                    <p class="text-slate-600">Budi ingin menjumlahkan sel B2 dan C2, tetapi ia hanya mengetik: <code class="bg-red-100 text-red-800 px-1.5 py-0.5 rounded font-mono font-bold">B2 + C2</code> di dalam sel. Mengapa perhitungannya tidak berjalan?</p>
+                    <select id="act3_q1" class="w-full border border-slate-300 rounded-lg p-2 bg-white focus:ring-2 focus:ring-indigo-500">
+                        <option value="">-- Pilih Alasan & Solusi --</option>
+                        <option value="correct">Kurang tanda '=' di awal. Harusnya mengetik '=B2+C2'</option>
+                        <option value="wrong1">Budi salah memilih nama sel, harusnya 'A2 + B2'</option>
+                        <option value="wrong2">Excel sedang rusak dan tidak bisa menghitung</option>
+                    </select>
+                </div>
+
+                <!-- Soal 2 Detektif Error -->
+                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-slate-700">2. Kasus Nilai Terendah:</span>
+                        <span class="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded font-mono font-semibold">Salah Tanda Rentang</span>
+                    </div>
+                    <p class="text-slate-600">Siti ingin mencari nilai terendah dari C4 sampai C10. Ia mengetik: <code class="bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded font-mono font-bold">=MIN(C4-C10)</code> tetapi hasilnya malah pengurangan angka. Apa tanda yang benar?</p>
+                    <select id="act3_q2" class="w-full border border-slate-300 rounded-lg p-2 bg-white focus:ring-2 focus:ring-indigo-500">
+                        <option value="">-- Pilih Tanda Pemisah Rentang yang Benar --</option>
+                        <option value="wrong1">Menggunakan tanda tambah (+) contoh: =MIN(C4+C10)</option>
+                        <option value="correct">Gunakan tanda titik dua (:) untuk rentang, contoh: =MIN(C4:C10)</option>
+                        <option value="wrong2">Gunakan tanda spasi spasi contoh: =MIN(C4 C10)</option>
+                    </select>
+                </div>
+
+                <!-- Soal 3 Detektif Error -->
+                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-slate-700">3. Kasus Rata-Rata Kelas:</span>
+                        <span class="bg-indigo-100 text-indigo-800 text-[10px] px-2 py-0.5 rounded font-mono font-semibold">Nama Fungsi Error</span>
+                    </div>
+                    <p class="text-slate-600">Guru ingin mencari rata-rata nilai siswa dan mengetik: <code class="bg-indigo-100 text-indigo-900 px-1.5 py-0.5 rounded font-mono font-bold">=RATARATA(D4:D10)</code>. Muncul pesan error <code class="text-rose-600 font-bold">#NAME?</code>. Apa nama fungsi resmi Excel untuk rata-rata?</p>
+                    <input type="text" id="act3_q3" placeholder="Ketik nama fungsi resmi Excel (Bahasa Inggris)..." class="w-full border border-slate-300 rounded-lg p-2 bg-white uppercase font-mono text-xs focus:ring-2 focus:ring-indigo-500">
+                </div>
+
+                <!-- Soal 4 Konsep Dinamis -->
+                <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="font-bold text-slate-700">4. Otomatisasi Perubahan Data:</span>
+                        <span class="bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded font-mono font-semibold">Uji Pemahaman</span>
+                    </div>
+                    <p class="text-slate-600">Jika angka pada sel C4 diubah dari 70 menjadi 100, apa yang akan terjadi pada sel E4 yang berisi rumus <code class="font-mono text-emerald-700 font-bold">=C4+D4</code>?</p>
+                    <select id="act3_q4" class="w-full border border-slate-300 rounded-lg p-2 bg-white focus:ring-2 focus:ring-indigo-500">
+                        <option value="">-- Pilih Efek Perubahan --</option>
+                        <option value="correct">Hasil di sel E4 otomatis membesar menyesuaikan angka baru</option>
+                        <option value="wrong1">Hasil E4 tetap angka lama dan harus dihapus manual</option>
+                        <option value="wrong2">Tabel Excel akan terhapus otomatis</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- REFLEKSI PEMAHAMAN SISWA TENTANG PEMBELAJARAN HARI INI -->
+        <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 md:p-6 print-shadow print-break-inside-avoid">
+            <div class="flex items-center gap-3 mb-4 border-b pb-3">
+                <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm">D</div>
+                <div>
+                    <h2 class="text-base font-bold text-slate-800">Jurnal Refleksi Pembelajaran Hari Ini</h2>
+                    <p class="text-xs text-slate-500">Isilah jawaban di bawah ini untuk mengukur sejauh mana pemahaman dan pengalaman belajar Anda.</p>
+                </div>
+            </div>
+
+            <div class="space-y-5 text-xs">
+                <!-- 1. Emoji Tingkat Pemahaman -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <label class="block font-bold text-slate-700 mb-2">1. Seberapa paham Anda terhadap materi rumus dasar Excel hari ini?</label>
+                    <div class="flex items-center justify-around max-w-md mx-auto py-2">
+                        <button type="button" onclick="selectUnderstanding(1)" id="emoji-1" class="emoji-btn text-3xl focus:outline-none" title="Sangat Belum Paham">😠</button>
+                        <button type="button" onclick="selectUnderstanding(2)" id="emoji-2" class="emoji-btn text-3xl focus:outline-none" title="Kurang Paham">🙁</button>
+                        <button type="button" onclick="selectUnderstanding(3)" id="emoji-3" class="emoji-btn text-3xl focus:outline-none" title="Cukup Paham">😐</button>
+                        <button type="button" onclick="selectUnderstanding(4)" id="emoji-4" class="emoji-btn text-3xl focus:outline-none" title="Paham">บ😃</button>
+                        <button type="button" onclick="selectUnderstanding(5)" id="emoji-5" class="emoji-btn text-3xl focus:outline-none" title="Sangat Paham & Mahir">🤩</button>
+                    </div>
+                    <p class="text-center text-slate-500 text-[11px] mt-1" id="understandingLabel">Klik emoji yang paling menggambarkan perasaan Anda saat ini</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- 2. Hal Paling Menarik -->
+                    <div class="space-y-1.5">
+                        <label for="reflectInteresting" class="font-bold text-slate-700 block">
+                            2. Tuliskan hal paling menarik atau ilmu baru yang Anda dapatkan hari ini:
+                        </label>
+                        <textarea id="reflectInteresting" rows="3" placeholder="Contoh: Saya baru tahu kalau rumus Excel harus pakai tanda sama dengan (=) dan bisa menghitung otomatis..." class="w-full p-2.5 border border-slate-300 rounded-lg bg-slate-50 text-slate-800 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"></textarea>
+                    </div>
+
+                    <!-- 3. Bagian Paling Sulit -->
+                    <div class="space-y-1.5">
+                        <label for="reflectDifficult" class="font-bold text-slate-700 block">
+                            3. Bagian mana yang terasa paling sulit/menantang saat praktik?
+                        </label>
+                        <textarea id="reflectDifficult" rows="3" placeholder="Contoh: Agak bingung menentukan rentang sel untuk MAX dan MIN..." class="w-full p-2.5 border border-slate-300 rounded-lg bg-slate-50 text-slate-800 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"></textarea>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- HASIL EVALUASI & HASIL AKHIR -->
+        <div id="resultCard" class="hidden bg-white rounded-2xl shadow-md border border-slate-200 p-6 print-shadow print-break-inside-avoid">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6 pb-6 border-b border-slate-100">
+                <div class="flex items-center gap-5">
+                    <div class="relative flex items-center justify-center w-24 h-24 rounded-full bg-slate-50 border-4 border-emerald-500 shadow-inner">
+                        <span id="scoreText" class="text-3xl font-extrabold text-slate-800">0</span>
+                        <span class="text-[10px] text-slate-400 absolute bottom-3 uppercase tracking-wider">/ 100 Skor</span>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800" id="gradeTitle">Hasil Evaluasi Praktikum</h3>
+                        <p class="text-sm text-slate-500 mt-1" id="gradeDescription">Sistem telah memeriksa seluruh rumus dan jurnal refleksi Anda.</p>
+                        <div class="mt-2 flex gap-2" id="badgeContainer"></div>
+                    </div>
+                </div>
+
+                <div class="w-full md:w-72 bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs space-y-2">
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Aturan Emas Excel:</span>
+                        <span class="font-bold font-mono text-emerald-700" id="statGold">1/1</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Total Nilai (E4:E7):</span>
+                        <span class="font-bold font-mono text-emerald-700" id="statSum">0/4 Sel</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Fungsi Statistik (C8:D10):</span>
+                        <span class="font-bold font-mono text-emerald-700" id="statStats">0/6 Sel</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Detektif Error & Refleksi:</span>
+                        <span class="font-bold font-mono text-emerald-700" id="statReflect">0/5 Poin</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detail Catatan Koreksi -->
+            <div class="mt-6">
+                <h4 class="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-list-check text-emerald-600"></i> Detail Catatan Koreksi Otomatis
+                </h4>
+                <div id="correctionList" class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                    <!-- Dynamic Correction Feedback -->
+                </div>
+            </div>
         </div>
-        <input type="hidden" id="reflectionRating" value="3">
-      </div>
 
-      <div class="row g-3">
-        <div class="col-md-6">
-          <label class="form-label fw-bold">Materi/Rumus apa yang paling menarik bagi Anda hari ini?</label>
-          <textarea class="form-control" id="ref_interesting" rows="2" placeholder="Tuliskan bagian favorit Anda..."></textarea>
+    </div>
+
+    <!-- ACTION BAR FIXED BOTTOM (TOMBOL UTAMA CEK & CETAK/DRIVE DI BAGIAN BWAH) -->
+    <div class="no-print fixed bottom-0 left-0 right-0 bg-slate-900/90 backdrop-blur-md border-t border-slate-800 p-3 z-40 shadow-2xl">
+        <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="text-xs text-slate-300 flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Pastikan Nama, Kelas, dan seluruh jawaban telah terisi dengan lengkap!</span>
+            </div>
+            <div class="flex flex-wrap items-center justify-end gap-3 w-full sm:w-auto">
+                <button onclick="checkAnswers()" class="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/30">
+                    <i class="fa-solid fa-calculator text-sm"></i> 1. Cek & Hitung Nilai
+                </button>
+
+                <button onclick="saveToDriveAndPrint()" class="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-6 py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-indigo-900/30">
+                    <i class="fa-solid fa-cloud-arrow-up text-sm"></i>
+                    <i class="fa-solid fa-print text-sm"></i> 2. Kirim Ke Drive & Cetak PDF
+                </button>
+            </div>
         </div>
-        <div class="col-md-6">
-          <label class="form-label fw-bold">Apa bagian paling sulit/menantang yang Anda hadapi?</label>
-          <textarea class="form-control" id="ref_difficult" rows="2" placeholder="Tuliskan kendala Anda..."></textarea>
+    </div>
+
+    <!-- MODAL PENGATURAN GOOGLE DRIVE -->
+    <div id="driveModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-brands fa-google-drive text-emerald-600"></i> Integrasi Drive Guru
+                </h3>
+                <button onclick="toggleDriveModal()" class="text-slate-400 hover:text-slate-600 text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-xs text-emerald-900 space-y-1">
+                <p class="font-bold"><i class="fa-solid fa-folder-open text-emerald-600 mr-1"></i> Folder Google Drive Aktif Guru:</p>
+                <a href="https://drive.google.com/drive/folders/1uNq20snd8-YPiRsyD7AqljU0mctijr-t?usp=sharing" target="_blank" class="text-emerald-700 underline font-mono break-all text-[11px]">
+                    https://drive.google.com/drive/folders/1uNq20snd8-YPiRsyD7AqljU0mctijr-t
+                </a>
+            </div>
+
+            <div class="space-y-2">
+                <label class="block text-xs font-bold text-slate-700">URL Web App Google Apps Script (Opsional):</label>
+                <input type="text" id="driveScriptUrl" placeholder="https://script.google.com/macros/s/.../exec" class="w-full border border-slate-300 rounded-lg p-2.5 font-mono text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                <p class="text-[11px] text-slate-500">
+                    *Masukkan URL Web App dari Google Apps Script agar rekap jawaban otomatis tersimpan dalam Spreadsheet di folder Drive tersebut. Jika dikosongkan, tombol tetap akan langsung mencetak/menyimpan dokumen PDF secara otomatis.
+                </p>
+            </div>
+
+            <!-- Kode Apps Script Siap Pakai -->
+            <div class="bg-slate-900 text-slate-100 p-3.5 rounded-xl text-[11px] font-mono space-y-2">
+                <div class="flex justify-between items-center text-slate-400 border-b border-slate-800 pb-1">
+                    <span>Kode Google Apps Script (Folder ID: 1uNq20snd8-YPiRsyD7AqljU0mctijr-t)</span>
+                    <button onclick="copyAppsScriptCode()" class="text-emerald-400 hover:text-emerald-300 font-bold"><i class="fa-regular fa-copy"></i> Salin</button>
+                </div>
+                <pre id="gasCodeSnippet" class="overflow-x-auto text-[10px] leading-relaxed text-emerald-300">
+function doPost(e) {
+  var data = JSON.parse(e.postData.contents);
+  var folderId = "1uNq20snd8-YPiRsyD7AqljU0mctijr-t"; // Folder Drive Guru
+  var folder = DriveApp.getFolderById(folderId);
+  var files = folder.getFilesByName("Rekap LKPD Excel Siswa");
+  var ss;
+  if (files.hasNext()) {
+    ss = SpreadsheetApp.open(files.next());
+  } else {
+    ss = SpreadsheetApp.create("Rekap LKPD Excel Siswa");
+    DriveApp.getFileById(ss.getId()).moveTo(folder);
+    ss.getActiveSheet().appendRow(["Waktu", "Nama Siswa", "Kelas", "No PC", "Skor Total", "Refleksi"]);
+  }
+  ss.getActiveSheet().appendRow([new Date(), data.studentName, data.studentClass, data.pcNumber, data.score, data.reflectInteresting]);
+  return ContentService.createTextOutput("OK");
+}</pre>
+            </div>
+
+            <div class="pt-2 text-right flex justify-end gap-2">
+                <button onclick="toggleDriveModal()" class="bg-slate-200 text-slate-700 font-medium px-4 py-2 rounded-lg text-xs hover:bg-slate-300">
+                    Tutup
+                </button>
+                <button onclick="saveDriveSettings()" class="bg-emerald-600 text-white font-medium px-5 py-2 rounded-lg text-xs hover:bg-emerald-700">
+                    Simpan URL Web App
+                </button>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 
-  <!-- KARTU REKAP NILAI -->
-  <div class="card card-activity border-success" id="resultCard" style="display: none;">
-    <div class="card-header bg-success text-white fw-bold">
-      <i class="fa-solid fa-award me-2"></i>Hasil Evaluasi & Rekapitulasi Nilai LKPD
+    <!-- MODAL PETUNJUK RUMUS -->
+    <div id="helpModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-book-bookmark text-indigo-600"></i> Panduan Rumus Excel Dasar
+                </h3>
+                <button onclick="toggleHelpModal()" class="text-slate-400 hover:text-slate-600 text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="space-y-3 text-xs text-slate-600">
+                <div class="p-3 bg-amber-50 rounded-xl border border-amber-200">
+                    <span class="font-bold text-amber-900 block mb-1">1. Aturan Emas Excel</span>
+                    <p class="text-amber-800">Setiap rumus <b>WAJIB</b> diawali tanda sama dengan (<code class="bg-amber-200 text-amber-900 px-1 rounded font-bold">=</code>). Contoh: <code>=C4+D4</code> atau <code>=SUM(C4:D4)</code>.</p>
+                </div>
+
+                <div class="p-3 bg-slate-50 rounded-xl border space-y-1">
+                    <span class="font-bold text-slate-800 block">2. Rumus Penjumlahan (SUM)</span>
+                    <p>Digunakan di kolom Total Nilai (E4 s.d. E7):</p>
+                    <code class="bg-slate-200 text-slate-800 px-2 py-1 rounded block font-mono font-bold text-xs">=C4+D4</code>
+                    <span class="text-slate-400 block italic">atau menggunakan fungsi: <code>=SUM(C4:D4)</code></span>
+                </div>
+
+                <div class="p-3 bg-slate-50 rounded-xl border space-y-2">
+                    <span class="font-bold text-slate-800 block">3. Fungsi Statistik Dasar (Kolom C & D)</span>
+                    <ul class="space-y-1 font-mono">
+                        <li><b class="text-indigo-600">AVERAGE</b> (Rata-Rata): <code class="bg-slate-200 px-1 rounded">=AVERAGE(C4:C7)</code></li>
+                        <li><b class="text-emerald-600">MAX</b> (Nilai Tertinggi): <code class="bg-slate-200 px-1 rounded">=MAX(C4:C7)</code></li>
+                        <li><b class="text-rose-600">MIN</b> (Nilai Terendah): <code class="bg-slate-200 px-1 rounded">=MIN(C4:C7)</code></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="pt-2 text-right">
+                <button onclick="toggleHelpModal()" class="bg-indigo-600 text-white font-medium px-5 py-2 rounded-lg text-xs hover:bg-indigo-700">
+                    Paham, Tutup Panduan
+                </button>
+            </div>
+        </div>
     </div>
-    <div class="card-body text-center">
-      <h6 class="text-muted m-0">TOTAL SKOR AKHIR:</h6>
-      <h1 class="display-3 fw-bold text-success my-1" id="finalScoreDisplay">0 / 100</h1>
-      <span id="gradePredicate" class="badge fs-6 bg-info">Sangat Baik</span>
-      <div id="scoreFeedbackList" class="text-start mt-3 p-3 bg-light rounded border small"></div>
+
+    <!-- MODAL KONFIRMASI RESET -->
+    <div id="resetModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div class="flex items-center gap-3 text-amber-600">
+                <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+                <h3 class="text-lg font-bold text-slate-800">Konfirmasi Reset</h3>
+            </div>
+            <p class="text-sm text-slate-600">Apakah Anda yakin ingin mengosongkan seluruh isi jawaban dan mengulang lembar kerja dari awal?</p>
+            <div class="flex justify-end gap-3 pt-2">
+                <button onclick="closeResetModal()" class="px-4 py-2 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200">Batal</button>
+                <button onclick="confirmResetWorksheet()" class="px-4 py-2 rounded-lg text-xs font-semibold bg-rose-600 text-white hover:bg-rose-700">Ya, Reset Semua</button>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- Floating Action Bar Bottom -->
-  <div class="action-bar-bottom d-flex justify-content-between align-items-center no-pdf">
-    <div>
-      <span class="fw-bold text-dark"><i class="fa-solid fa-circle-check text-success me-1"></i> Selesai Mengerjakan?</span>
-      <span class="text-muted small d-none d-md-inline"> Periksa nilai Anda lalu simpan berkas PDF tugas.</span>
-    </div>
-    <div class="d-flex gap-2">
-      <button class="btn btn-primary fw-bold px-3" onclick="checkAllAnswers()"><i class="fa-solid fa-calculator me-1"></i> 1. Cek & Hitung Nilai</button>
-      <button class="btn btn-success fw-bold px-4" id="btnSubmitAndPrint" onclick="exportAndSendPDF()"><i class="fa-solid fa-file-pdf me-1"></i> 2. Kirim PDF Ke Drive Guru</button>
-    </div>
-  </div>
+    <!-- SCRIPT LOGIKA APLIKASI WEB INTERAKTIF -->
+    <script>
+        // Data Mentah Siswa
+        let rawStudents = [
+            { no: 1, name: "Andi", uh1: 70, uh2: 80, row: 4 },
+            { no: 2, name: "Budi", uh1: 85, uh2: 90, row: 5 },
+            { no: 3, name: "Citra", uh1: 60, uh2: 75, row: 6 },
+            { no: 4, name: "Dewi", uh1: 90, uh2: 95, row: 7 }
+        ];
 
-</div>
+        // Grid Penyimpanan Rumus Input Siswa
+        let userGrid = {};
+        let activeCell = "E4";
+        let selectedUnderstandingScore = 0;
+        let scriptDriveUrl = "";
 
-<!-- Modal Drive Config -->
-<div class="modal fade no-pdf" id="driveConfigModal" tabindex="-1">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header bg-success text-white">
-        <h5 class="modal-title fw-bold"><i class="fa-solid fa-cloud-arrow-up me-2"></i>Pengaturan Google Drive Guru</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <label class="form-label fw-bold">URL Web App Google Apps Script:</label>
-        <input type="text" class="form-control font-monospace mb-3" id="gasScriptUrl" placeholder="https://script.google.com/macros/s/.../exec">
-        <p class="small text-muted m-0">URL ini digunakan untuk mengirim otomatis berkas PDF siswa ke Folder Google Drive Anda.</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-        <button type="button" class="btn btn-success fw-bold" onclick="saveDriveConfig()">Simpan URL</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-  // TEMPELKAN URL WEB APP GOOGLE APPS SCRIPT ANDA DI DI DALAM TANDA PETIK DI BAWAH INI
-  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxi2OpvANOhZYSIHsFp4eOly-FKNSo9ZBi9BicbUlGYIhyaYmoLLbkmeG4cKIRMlXMydg/exec";
-
-  const cellData = {
-    'E4': { formula: '', value: '-', expectedFormula: ['=C4+D4', '=SUM(C4:D4)'], expectedValue: 150 },
-    'E5': { formula: '', value: '-', expectedFormula: ['=C5+D5', '=SUM(C5:D5)'], expectedValue: 175 },
-    'E6': { formula: '', value: '-', expectedFormula: ['=C6+D6', '=SUM(C6:D6)'], expectedValue: 135 },
-    'E7': { formula: '', value: '-', expectedFormula: ['=C7+D7', '=SUM(C7:D7)'], expectedValue: 185 },
-    'C8': { formula: '', value: '-', expectedFormula: ['=AVERAGE(C4:C7)'], expectedValue: 76.25 },
-    'D8': { formula: '', value: '-', expectedFormula: ['=AVERAGE(D4:D7)'], expectedValue: 85 },
-    'C9': { formula: '', value: '-', expectedFormula: ['=MAX(C4:C7)'], expectedValue: 90 },
-    'D9': { formula: '', value: '-', expectedFormula: ['=MAX(D4:D7)'], expectedValue: 95 },
-    'C10': { formula: '', value: '-', expectedFormula: ['=MIN(C4:C7)'], expectedValue: 60 },
-    'D10': { formula: '', value: '-', expectedFormula: ['=MIN(D4:D7)'], expectedValue: 75 }
-  };
-
-  let activeCellId = 'E4';
-
-  document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('pracDate').valueAsDate = new Date();
-    selectCell('E4');
-    if (GAS_WEB_APP_URL && GAS_WEB_APP_URL !== "PASTE_URL_WEB_APP_AKHIRAN_EXEC_DI_SINI") {
-      document.getElementById('gasScriptUrl').value = GAS_WEB_APP_URL;
-    }
-  });
-
-  function selectCell(cellId) {
-    document.querySelectorAll('.excel-cell-target').forEach(el => el.classList.remove('active'));
-    activeCellId = cellId;
-    
-    const cellEl = document.getElementById(`cell_${cellId}`);
-    if (cellEl) cellEl.classList.add('active');
-
-    document.getElementById('activeCellLabel').innerText = cellId;
-    document.getElementById('formulaInput').value = cellData[cellId].formula || '';
-    document.getElementById('syntaxFeedback').innerHTML = '';
-  }
-
-  function handleFormulaTyping(e) {
-    cellData[activeCellId].formula = e.target.value.trim();
-    if (e.key === 'Enter') checkActiveCellSyntax();
-  }
-
-  function checkActiveCellSyntax() {
-    const cell = cellData[activeCellId];
-    const formula = (cell.formula || '').toUpperCase().replace(/\s+/g, '');
-    const feedback = document.getElementById('syntaxFeedback');
-
-    if (!formula.startsWith('=')) {
-      feedback.innerHTML = `<span class="badge bg-danger p-2"><i class="fa-solid fa-circle-xmark me-1"></i> Lupa tanda sama dengan (=)!</span>`;
-      return false;
-    }
-
-    const isValid = cell.expectedFormula.some(exp => exp.toUpperCase().replace(/\s+/g, '') === formula);
-    if (isValid) {
-      cell.value = cell.expectedValue;
-      updateCellDisplay(activeCellId);
-      feedback.innerHTML = `<span class="badge bg-success p-2"><i class="fa-solid fa-circle-check me-1"></i> Rumus Benar! Hasil: ${cell.expectedValue}</span>`;
-      return true;
-    } else {
-      feedback.innerHTML = `<span class="badge bg-warning text-dark p-2"><i class="fa-solid fa-triangle-exclamation me-1"></i> Sintaks belum tepat. Periksa acuan sel.</span>`;
-      return false;
-    }
-  }
-
-  function updateCellDisplay(cellId) {
-    const cellEl = document.getElementById(`cell_${cellId}`);
-    if (cellEl) {
-      const valSpan = cellEl.querySelector('.cell-val');
-      const tagDiv = cellEl.querySelector('.cell-tag');
-      if (valSpan) valSpan.innerHTML = cellData[cellId].value !== '-' ? `<b>${cellData[cellId].value}</b>` : '-';
-      if (tagDiv) {
-        tagDiv.innerHTML = cellData[cellId].formula ? `<div class="formula-tag-print">fx: ${cellData[cellId].formula}</div>` : '';
-      }
-    }
-  }
-
-  function applyAutoFill() {
-    ['E4','E5','E6','E7'].forEach((id, idx) => {
-      const row = 4 + idx;
-      cellData[id].formula = `=C${row}+D${row}`;
-      cellData[id].value = cellData[id].expectedValue;
-      updateCellDisplay(id);
-    });
-    selectCell('E7');
-    document.getElementById('syntaxFeedback').innerHTML = `<span class="badge bg-info text-dark p-2"><i class="fa-solid fa-arrows-down-to-line me-1"></i> Auto-Fill berhasil diterapkan E4:E7!</span>`;
-  }
-
-  function setRating(val, el) {
-    document.getElementById('reflectionRating').value = val;
-    document.querySelectorAll('.reflection-emoji').forEach(e => e.classList.remove('selected'));
-    el.classList.add('selected');
-  }
-
-  function checkAllAnswers() {
-    let score = 0;
-    let feedback = [];
-
-    if (document.getElementById('act1_conclusion').value.trim().length > 5) {
-      score += 10;
-      feedback.push('✔ <b>Aktivitas 1 (10/10):</b> Kesimpulan Aturan Emas Excel terisi.');
-    } else {
-      feedback.push('❌ <b>Aktivitas 1 (0/10):</b> Kesimpulan belum diisi.');
-    }
-
-    let act2Score = 0;
-    Object.keys(cellData).forEach(id => {
-      const cell = cellData[id];
-      const form = (cell.formula || '').toUpperCase().replace(/\s+/g, '');
-      if (cell.expectedFormula.some(exp => exp.toUpperCase().replace(/\s+/g, '') === form)) {
-        act2Score += 5;
-        cell.value = cell.expectedValue;
-        updateCellDisplay(id);
-      }
-    });
-    score += act2Score;
-    feedback.push(`✔️ <b>Aktivitas 2 (${act2Score}/50):</b> Menyelesaikan ${act2Score/5} dari 10 sel rumus.`);
-
-    let act3Score = 0;
-    if (document.getElementById('act3_q1').value.trim().length > 5) act3Score += 10;
-    if (document.getElementById('act3_q2').value.trim().length > 5) act3Score += 10;
-    score += act3Score;
-    feedback.push(`✔️ <b>Aktivitas 3 (${act3Score}/20):</b> Analisis error dan kasus dinamis terisi.`);
-
-    let refScore = 0;
-    if (document.getElementById('ref_interesting').value.trim().length > 3) refScore += 10;
-    if (document.getElementById('ref_difficult').value.trim().length > 3) refScore += 10;
-    score += refScore;
-    feedback.push(`✔️️ <b>Refleksi (${refScore}/20):</b> Jurnal refleksi terisi.`);
-
-    document.getElementById('resultCard').style.display = 'block';
-    document.getElementById('finalScoreDisplay').innerText = `${score} / 100`;
-    document.getElementById('scoreFeedbackList').innerHTML = feedback.join('<br>');
-    
-    const pred = document.getElementById('gradePredicate');
-    if (score >= 85) { pred.className = 'badge fs-6 bg-success'; pred.innerText = 'Sangat Baik (A)'; }
-    else if (score >= 75) { pred.className = 'badge fs-6 bg-primary'; pred.innerText = 'Baik (B)'; }
-    else if (score >= 60) { pred.className = 'badge fs-6 bg-warning text-dark'; pred.innerText = 'Cukup (C)'; }
-    else { pred.className = 'badge fs-6 bg-danger'; pred.innerText = 'Perlu Bimbingan (D)'; }
-
-    return score;
-  }
-
-  async function exportAndSendPDF() {
-    const studentName = document.getElementById('studentName').value.trim();
-    const studentClass = document.getElementById('studentClass').value.trim();
-
-    if (!studentName || !studentClass) {
-      alert('Harap isi Nama Siswa dan Kelas terlebih dahulu!');
-      document.getElementById('studentName').focus();
-      return;
-    }
-
-    checkAllAnswers();
-
-    const btn = document.getElementById('btnSubmitAndPrint');
-    btn.disabled = true;
-    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-2"></i> Mengirim ke Drive & Mengunduh PDF...`;
-
-    document.body.classList.add('pdf-export-mode');
-
-    const element = document.getElementById('lkpd-container');
-    const safeName = studentName.replace(/[^a-zA-Z0-9]/g, '_');
-    const safeClass = studentClass.replace(/[^a-zA-Z0-9]/g, '_');
-    const filename = `LKPD_Excel_${safeName}_${safeClass}.pdf`;
-
-    const opt = {
-      margin:       [10, 10, 10, 10],
-      filename:     filename,
-      image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true, logging: false },
-      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-      pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
-    };
-
-    try {
-      const worker = html2pdf().set(opt).from(element);
-      const pdfBase64 = await worker.outputPdf('datauristring');
-
-      const targetUrl = GAS_WEB_APP_URL !== "PASTE_URL_WEB_APP_AKHIRAN_EXEC_DI_SINI" ? GAS_WEB_APP_URL : (localStorage.getItem('gas_web_app_url') || document.getElementById('gasScriptUrl').value.trim());
-
-      if (targetUrl) {
-        await fetch(targetUrl, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            filename: filename,
-            studentName: studentName,
-            studentClass: studentClass,
-            pdfBase64: pdfBase64
-          })
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("praktikumDate").valueAsDate = new Date();
+            renderSpreadsheet();
+            selectCell("E4");
+            
+            // Load saved drive URL if available
+            const savedUrl = localStorage.getItem("excel_lkpd_drive_url");
+            if (savedUrl) {
+                scriptDriveUrl = savedUrl;
+                document.getElementById("driveScriptUrl").value = savedUrl;
+            }
         });
-      }
 
-      await worker.save();
-      alert('Berhasil! Lembar kerja telah dikirim ke Google Drive dan salinan PDF diunduh.');
-    } catch (err) {
-      console.error('PDF Error:', err);
-      alert('Terjadi kendala saat menyimpan PDF. Silakan coba lagi.');
-    } finally {
-      document.body.classList.remove('pdf-export-mode');
-      btn.disabled = false;
-      btn.innerHTML = `<i class="fa-solid fa-file-pdf me-1"></i> 2. Kirim PDF Ke Drive Guru`;
-    }
-  }
+        // MEMPERBAARUI TAMPILAN SEL (MENAMPILKAN HASIL & RUMUS SISWA SECARA TRANSPARAN UNTUK PDF)
+        function updateCellDisplay(cellId) {
+            const el = document.getElementById(`cell-${cellId}`);
+            if (!el) return;
+            const formula = (userGrid[cellId] || "").trim();
+            const result = formula !== "" ? evaluateFormulaPreview(cellId, formula) : "";
+            
+            if (formula !== "") {
+                el.innerHTML = `
+                    <div class="font-bold text-slate-800 text-sm">${result}</div>
+                    <div class="text-[10px] font-mono text-sky-700 bg-sky-50 border border-sky-200 px-1.5 py-0.5 rounded mt-1 inline-block print-formula-tag">
+                        <i class="fa-solid fa-code text-[9px] mr-0.5 text-sky-500"></i>${formula}
+                    </div>
+                `;
+            } else {
+                el.innerHTML = `<span class="text-slate-300 text-xs italic no-print">(kosong)</span>`;
+            }
+        }
 
-  function openDriveModal() {
-    const modalEl = document.getElementById('driveConfigModal');
-    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-      const modal = new bootstrap.Modal(modalEl);
-      modal.show();
-    } else {
-      alert('Bootstrap JS belum terload sempurna.');
-    }
-  }
+        // Render Lembar Kerja Spreadsheet
+        function renderSpreadsheet() {
+            const tbody = document.getElementById("spreadsheetBody");
+            tbody.innerHTML = "";
 
-  function saveDriveConfig() {
-    const url = document.getElementById('gasScriptUrl').value.trim();
-    localStorage.setItem('gas_web_app_url', url);
-    alert('URL Google Apps Script berhasil disimpan!');
-    const modalEl = document.getElementById('driveConfigModal');
-    const modalInstance = bootstrap.Modal.getInstance(modalEl);
-    if (modalInstance) modalInstance.hide();
-  }
+            // 1. Render Baris Siswa (Baris 4 s.d. 7)
+            rawStudents.forEach((st) => {
+                const r = st.row;
+                const tr = document.createElement("tr");
+                tr.className = "text-center hover:bg-slate-50 border-b";
 
-  function resetForm() {
-    if (confirm('Apakah Anda yakin ingin mereset lembar kerja ini?')) location.reload();
-  }
-</script>
+                tr.innerHTML = `
+                    <td class="p-2 bg-slate-200 font-mono text-xs text-slate-500">${r}</td>
+                    <td class="p-2 text-slate-500">${st.no}</td>
+                    <td class="p-2 text-left font-medium text-slate-800">${st.name}</td>
+                    <td class="p-2 font-mono">
+                        <input type="number" value="${st.uh1}" onchange="updateScoreVal(${st.no}, 'uh1', this.value)" class="w-16 text-center bg-transparent border-b border-dashed border-slate-300 focus:border-sky-500 focus:bg-white focus:outline-none">
+                    </td>
+                    <td class="p-2 font-mono">
+                        <input type="number" value="${st.uh2}" onchange="updateScoreVal(${st.no}, 'uh2', this.value)" class="w-16 text-center bg-transparent border-b border-dashed border-slate-300 focus:border-sky-500 focus:bg-white focus:outline-none">
+                    </td>
+                    <td id="cell-E${r}" onclick="selectCell('E${r}')" class="p-2 font-mono cell-editable bg-emerald-50/50"></td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // 2. Render Baris Rangkuman Statistik (Baris 8 s.d. 10)
+            const summaryRows = [
+                { row: 8, title: "Rata-Rata Kelas", colC: "C8", colD: "D8" },
+                { row: 9, title: "Nilai Tertinggi", colC: "C9", colD: "D9" },
+                { row: 10, title: "Nilai Terendah", colC: "C10", colD: "D10" }
+            ];
+
+            summaryRows.forEach(sr => {
+                const tr = document.createElement("tr");
+                tr.className = "text-center bg-slate-50/80 font-medium border-b";
+                tr.innerHTML = `
+                    <td class="p-2 bg-slate-200 font-mono text-xs text-slate-500">${sr.row}</td>
+                    <td class="p-2 font-bold text-left text-slate-700" colspan="2">${sr.title}</td>
+                    <td id="cell-${sr.colC}" onclick="selectCell('${sr.colC}')" class="p-2 font-mono cell-editable bg-sky-50/50"></td>
+                    <td id="cell-${sr.colD}" onclick="selectCell('${sr.colD}')" class="p-2 font-mono cell-editable bg-sky-50/50"></td>
+                    <td class="bg-slate-100"></td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Refresh isi sel berdasarkan rumus yang pernah diinput
+            Object.keys(userGrid).forEach(cellId => {
+                updateCellDisplay(cellId);
+            });
+        }
+
+        function updateScoreVal(studentNo, field, val) {
+            const num = parseFloat(val) || 0;
+            const st = rawStudents.find(s => s.no === studentNo);
+            if (st) {
+                st[field] = num;
+                renderSpreadsheet();
+            }
+        }
+
+        // Memilih Sel Aktif
+        function selectCell(cellId) {
+            document.querySelectorAll(".cell-editable").forEach(el => el.classList.remove("active"));
+            activeCell = cellId;
+            const targetEl = document.getElementById(`cell-${cellId}`);
+            if (targetEl) targetEl.classList.add("active");
+
+            document.getElementById("activeCellLabel").innerText = cellId;
+            document.getElementById("formulaBar").value = userGrid[cellId] || "";
+            document.getElementById("formulaBar").focus();
+            hideCellFeedback();
+        }
+
+        // Update Nilai dari Formula Bar
+        function updateActiveCellValue(val) {
+            if (!activeCell) return;
+            userGrid[activeCell] = val;
+            updateCellDisplay(activeCell);
+        }
+
+        // FITUR BARU: CEK SINTAKS SATU PER SATU PER SEL (SOAL NOMOR 2)
+        function checkSingleCellSyntax() {
+            if (!activeCell) return;
+            const formula = (userGrid[activeCell] || "").trim();
+            const toastEl = document.getElementById("cellFeedbackToast");
+            const textEl = document.getElementById("cellFeedbackText");
+
+            toastEl.classList.remove("hidden", "bg-emerald-100", "text-emerald-900", "bg-rose-100", "text-rose-900", "bg-amber-100", "text-amber-900");
+            toastEl.classList.add("flex");
+
+            if (!formula) {
+                toastEl.classList.add("bg-amber-100", "text-amber-900");
+                textEl.innerHTML = `<i class="fa-solid fa-circle-exclamation text-amber-600"></i> Sel <b>${activeCell}</b> masih kosong. Ketik rumus diawali tanda = lalu klik cek lagi.`;
+                return;
+            }
+
+            if (!formula.startsWith("=")) {
+                toastEl.classList.add("bg-rose-100", "text-rose-900");
+                textEl.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-600"></i> <b>Sintaks Salah pada Sel ${activeCell}:</b> Lupa tanda sama dengan (<code class="bg-rose-200 px-1 font-bold">=</code>) di awal! Excel menganggap ini teks biasa.`;
+                return;
+            }
+
+            const clean = formula.toUpperCase().replace(/\s+/g, '').replace(/,/g, ';');
+            let isCorrect = false;
+            let hint = "";
+
+            if (activeCell.startsWith("E")) {
+                const r = parseInt(activeCell.replace("E", ""));
+                isCorrect = (clean === `=C${r}+D${r}` || clean === `=D${r}+C${r}` || clean === `=SUM(C${r}:D${r})` || clean === `=SUM(C${r};D${r})`);
+                hint = `Gunakan penjumlahan dua sel: <code>=C${r}+D${r}</code> atau <code>=SUM(C${r}:D${r})</code>`;
+            } else if (activeCell === "C8") {
+                isCorrect = (clean === "=AVERAGE(C4:C7)" || clean === "=AVERAGE(C4;C7)");
+                hint = `Gunakan fungsi AVERAGE untuk rentang C4 ke C7: <code>=AVERAGE(C4:C7)</code>`;
+            } else if (activeCell === "D8") {
+                isCorrect = (clean === "=AVERAGE(D4:D7)" || clean === "=AVERAGE(D4;D7)");
+                hint = `Gunakan fungsi AVERAGE untuk rentang D4 ke D7: <code>=AVERAGE(D4:D7)</code>`;
+            } else if (activeCell === "C9") {
+                isCorrect = (clean === "=MAX(C4:C7)" || clean === "=MAX(C4;C7)");
+                hint = `Gunakan fungsi MAX untuk rentang C4 ke C7: <code>=MAX(C4:C7)</code>`;
+            } else if (activeCell === "D9") {
+                isCorrect = (clean === "=MAX(D4:D7)" || clean === "=MAX(D4;D7)");
+                hint = `Gunakan fungsi MAX untuk rentang D4 ke D7: <code>=MAX(D4:D7)</code>`;
+            } else if (activeCell === "C10") {
+                isCorrect = (clean === "=MIN(C4:C7)" || clean === "=MIN(C4;C7)");
+                hint = `Gunakan fungsi MIN untuk rentang C4 ke C7: <code>=MIN(C4:C7)</code>`;
+            } else if (activeCell === "D10") {
+                isCorrect = (clean === "=MIN(D4:D7)" || clean === "=MIN(D4;D7)");
+                hint = `Gunakan fungsi MIN untuk rentang D4 ke D7: <code>=MIN(D4:D7)</code>`;
+            }
+
+            if (isCorrect) {
+                toastEl.classList.add("bg-emerald-100", "text-emerald-900");
+                textEl.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600"></i> <b>Sintaks Benar!</b> Rumus pada sel <b>${activeCell}</b> (<code>${formula}</code>) sudah tepat.`;
+            } else {
+                toastEl.classList.add("bg-rose-100", "text-rose-900");
+                textEl.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-600"></i> <b>Sintaks Belum Tepat pada Sel ${activeCell}.</b> Petunjuk: ${hint}`;
+            }
+        }
+
+        function hideCellFeedback() {
+            const toastEl = document.getElementById("cellFeedbackToast");
+            if (toastEl) toastEl.classList.add("hidden");
+        }
+
+        // Evaluasi Sintaks Formula Sederhana
+        function evaluateFormulaPreview(cellId, val) {
+            val = (val || "").trim();
+            if (!val.startsWith("=")) return val;
+
+            const clean = val.toUpperCase().replace(/\s+/g, '').replace(/,/g, ';');
+
+            if (cellId.startsWith("E")) {
+                const r = parseInt(cellId.replace("E", ""));
+                const st = rawStudents.find(s => s.row === r);
+                if (st) {
+                    if (clean === `=C${r}+D${r}` || clean === `=D${r}+C${r}` || clean === `=SUM(C${r}:D${r})` || clean === `=SUM(C${r};D${r})`) {
+                        return st.uh1 + st.uh2;
+                    }
+                }
+            }
+
+            const uh1List = rawStudents.map(s => s.uh1);
+            const uh2List = rawStudents.map(s => s.uh2);
+
+            if (cellId === "C8" && (clean === "=AVERAGE(C4:C7)" || clean === "=AVERAGE(C4;C7)")) {
+                const avg = uh1List.reduce((a, b) => a + b, 0) / uh1List.length;
+                return Number.isInteger(avg) ? avg : avg.toFixed(2);
+            }
+            if (cellId === "D8" && (clean === "=AVERAGE(D4:D7)" || clean === "=AVERAGE(D4;D7)")) {
+                const avg = uh2List.reduce((a, b) => a + b, 0) / uh2List.length;
+                return Number.isInteger(avg) ? avg : avg.toFixed(2);
+            }
+            if (cellId === "C9" && (clean === "=MAX(C4:C7)" || clean === "=MAX(C4;C7)")) return Math.max(...uh1List);
+            if (cellId === "D9" && (clean === "=MAX(D4:D7)" || clean === "=MAX(D4;D7)")) return Math.max(...uh2List);
+            if (cellId === "C10" && (clean === "=MIN(C4:C7)" || clean === "=MIN(C4;C7)")) return Math.min(...uh1List);
+            if (cellId === "D10" && (clean === "=MIN(D4:D7)" || clean === "=MIN(D4;D7)")) return Math.min(...uh2List);
+
+            return val;
+        }
+
+        // Fitur Simulasi Auto-Fill E4 ke E7
+        function autoFillTotal() {
+            const baseFormula = userGrid["E4"];
+            if (!baseFormula || !baseFormula.startsWith("=")) {
+                selectCell("E4");
+                document.getElementById("formulaBar").value = "=C4+D4";
+                userGrid["E4"] = "=C4+D4";
+                updateCellDisplay("E4");
+            }
+
+            for (let r = 4; r <= 7; r++) {
+                const targetCell = `E${r}`;
+                const generatedFormula = `=C${r}+D${r}`;
+                userGrid[targetCell] = generatedFormula;
+                updateCellDisplay(targetCell);
+            }
+            selectCell("E7");
+        }
+
+        // Eksperimen Aktivitas 1
+        function runExp1() {
+            const val = document.getElementById("expInput1").value;
+            document.getElementById("expResult1").innerText = val || " ";
+        }
+        function runExp2() {
+            const val = document.getElementById("expInput2").value.trim();
+            const resEl = document.getElementById("expResult2");
+            if (val.startsWith("=")) {
+                try {
+                    const clean = val.replace("=", "");
+                    const evalRes = Function(`'use strict'; return (${clean})`)();
+                    resEl.innerText = isNaN(evalRes) ? "ERROR" : evalRes;
+                } catch {
+                    resEl.innerText = val;
+                }
+            } else {
+                resEl.innerText = val;
+            }
+        }
+
+        // Pemilihan Rating Emoji Refleksi
+        function selectUnderstanding(score) {
+            selectedUnderstandingScore = score;
+            const labels = [
+                "",
+                "1/5 - Sangat Belum Paham (Perlu Bimbingan Ulang)",
+                "2/5 - Kurang Paham (Masih Banyak Bingung)",
+                "3/5 - Cukup Paham (Bisa Jika Melihat Petunjuk)",
+                "4/5 - Paham (Bisa Mengerjakan Sendiri)",
+                "5/5 - Sangat Paham & Mahir Excel!"
+            ];
+            
+            for (let i = 1; i <= 5; i++) {
+                const btn = document.getElementById(`emoji-${i}`);
+                if (btn) {
+                    if (i === score) btn.classList.add("selected");
+                    else btn.classList.remove("selected");
+                }
+            }
+            document.getElementById("understandingLabel").innerText = labels[score];
+        }
+
+        // PEMERIKSAAN KESELURUHAN & PENILAIAN
+        function checkAnswers() {
+            let score = 0;
+            let feedback = [];
+
+            // 1. Cek Aktivitas 1 Kesimpulan (10 Skor)
+            const goldAns = document.getElementById("goldRuleAnswer").value.trim();
+            let scoreGold = 0;
+            if (goldAns.length >= 5) {
+                score += 10;
+                scoreGold = 1;
+            } else {
+                feedback.push("<b>Aktivitas 1:</b> Tuliskan kesimpulan fungsi tanda sama dengan (=) pada Excel.");
+            }
+
+            // 2. Cek Total Nilai E4:E7 (40 Skor -> 10 Skor per sel)
+            let countSum = 0;
+            rawStudents.forEach(st => {
+                const cellId = `E${st.row}`;
+                const rawVal = (userGrid[cellId] || "").trim().toUpperCase().replace(/\s+/g, '');
+                const cellEl = document.getElementById(`cell-${cellId}`);
+
+                const isCorrect = rawVal.startsWith("=") && (rawVal === `=C${st.row}+D${st.row}` || rawVal === `=D${st.row}+C${st.row}` || rawVal.includes(`SUM(C${st.row}`));
+                
+                if (isCorrect && cellEl) {
+                    score += 10;
+                    countSum++;
+                    cellEl.className = "p-2 font-mono cell-editable font-bold cell-correct";
+                } else if (cellEl) {
+                    cellEl.className = "p-2 font-mono cell-editable font-bold cell-incorrect";
+                    feedback.push(`Sel <b>${cellId}</b>: Periksa rumus Total Nilai ${st.name}. Gunakan: <code>=C${st.row}+D${st.row}</code> atau <code>=SUM(C${st.row}:D${st.row})</code>`);
+                }
+                updateCellDisplay(cellId);
+            });
+
+            // 3. Cek Fungsi Statistik C8:D10 (30 Skor -> 5 Skor per sel)
+            let countStats = 0;
+            const statTargets = [
+                { id: "C8", fn: "AVERAGE", range: "C4:C7", name: "Rata-Rata UH 1" },
+                { id: "D8", fn: "AVERAGE", range: "D4:D7", name: "Rata-Rata UH 2" },
+                { id: "C9", fn: "MAX", range: "C4:C7", name: "Nilai Tertinggi UH 1" },
+                { id: "D9", fn: "MAX", range: "D4:D7", name: "Nilai Tertinggi UH 2" },
+                { id: "C10", fn: "MIN", range: "C4:C7", name: "Nilai Terendah UH 1" },
+                { id: "D10", fn: "MIN", range: "D4:D7", name: "Nilai Terendah UH 2" }
+            ];
+
+            statTargets.forEach(target => {
+                const rawVal = (userGrid[target.id] || "").trim().toUpperCase().replace(/\s+/g, '');
+                const cellEl = document.getElementById(`cell-${target.id}`);
+
+                const isCorrect = rawVal.startsWith("=") && rawVal.includes(target.fn) && (rawVal.includes("C4") || rawVal.includes("D4"));
+
+                if (isCorrect && cellEl) {
+                    score += 5;
+                    countStats++;
+                    cellEl.className = "p-2 font-mono cell-editable font-bold cell-correct";
+                } else if (cellEl) {
+                    cellEl.className = "p-2 font-mono cell-editable font-bold cell-incorrect";
+                    feedback.push(`Sel <b>${target.id}</b>: Periksa rumus ${target.name}. Gunakan: <code>=${target.fn}(${target.range})</code>`);
+                }
+                updateCellDisplay(target.id);
+            });
+
+            // 4. Cek Aktivitas 3 Detektif Error & Refleksi (20 Skor)
+            let countReflect = 0;
+            
+            if (document.getElementById("act3_q1").value === "correct") { score += 4; countReflect++; }
+            else feedback.push("<b>Aktivitas 3 (Soal 1):</b> Ketikan tanpa '=' tidak dihitung Excel (dianggap teks biasa).");
+
+            if (document.getElementById("act3_q2").value === "correct") { score += 4; countReflect++; }
+            else feedback.push("<b>Aktivitas 3 (Soal 2):</b> Tanda pemisah rentang sel yang benar adalah titik dua (:).");
+
+            const q3Val = document.getElementById("act3_q3").value.trim().toUpperCase();
+            if (q3Val === "AVERAGE") { score += 4; countReflect++; }
+            else feedback.push("<b>Aktivitas 3 (Soal 3):</b> Nama resmi fungsi rata-rata di Excel adalah <code>AVERAGE</code>.");
+
+            if (document.getElementById("act3_q4").value === "correct") { score += 4; countReflect++; }
+            else feedback.push("<b>Aktivitas 3 (Soal 4):</b> Mengubah data mentah membuat hasil rumus berubah otomatis.");
+
+            // Jurnal Refleksi Siswa (4 Poin jika terisi)
+            const reflectText1 = document.getElementById("reflectInteresting").value.trim();
+            if (selectedUnderstandingScore > 0 && reflectText1.length >= 5) {
+                score += 4;
+                countReflect++;
+            } else {
+                feedback.push("<b>Jurnal Refleksi:</b> Jangan lupa memilih emoji pemahaman dan mengisi kesan pembelajaran hari ini.");
+            }
+
+            // Display Results
+            const resultCard = document.getElementById("resultCard");
+            resultCard.classList.remove("hidden");
+            document.getElementById("scoreText").innerText = score;
+            document.getElementById("statGold").innerText = `${scoreGold}/1`;
+            document.getElementById("statSum").innerText = `${countSum}/4 Sel`;
+            document.getElementById("statStats").innerText = `${countStats}/6 Sel`;
+            document.getElementById("statReflect").innerText = `${countReflect}/5 Poin`;
+
+            // Grade Title & Badge
+            const gradeTitle = document.getElementById("gradeTitle");
+            const badgeContainer = document.getElementById("badgeContainer");
+            badgeContainer.innerHTML = "";
+
+            if (score === 100) {
+                gradeTitle.innerText = "Sangat Baik! Pemahaman Sempurna";
+                badgeContainer.innerHTML = `<span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-1 rounded-md font-semibold">Sempurna (100%)</span>`;
+            } else if (score >= 75) {
+                gradeTitle.innerText = "Tuntas (Memahami Rumus Dasar)";
+                badgeContainer.innerHTML = `<span class="bg-blue-100 text-blue-800 text-xs px-2.5 py-1 rounded-md font-semibold">Kompeten</span>`;
+            } else {
+                gradeTitle.innerText = "Perlu Bimbingan Tambahan";
+                badgeContainer.innerHTML = `<span class="bg-amber-100 text-amber-800 text-xs px-2.5 py-1 rounded-md font-semibold">Belum Tuntas</span>`;
+            }
+
+            // Correction Feedback List
+            const listEl = document.getElementById("correctionList");
+            if (feedback.length === 0) {
+                listEl.innerHTML = `<div class="col-span-2 p-3.5 bg-emerald-50 text-emerald-800 rounded-xl border border-emerald-200 flex items-center gap-2"><i class="fa-solid fa-circle-check text-base"></i> Selamat! Seluruh rumus dan pertanyaan refleksi telah dijawab dengan sangat tepat.</div>`;
+            } else {
+                listEl.innerHTML = feedback.map(item => `<div class="p-2.5 bg-rose-50 text-rose-900 rounded-lg border border-rose-200">${item}</div>`).join("");
+            }
+
+            resultCard.scrollIntoView({ behavior: "smooth" });
+            return score;
+        }
+
+        // FITUR UTAMA: MENYIAPKAN DOM & OTOMATIS CETAK LANGSUNG KE PDF
+        function prepareInputsForPrint() {
+            // 1. Sinkronisasi nilai input teks & angka ke atribut value
+            document.querySelectorAll("input").forEach(input => {
+                input.setAttribute("value", input.value);
+            });
+
+            // 2. Sinkronisasi textarea
+            document.querySelectorAll("textarea").forEach(ta => {
+                ta.textContent = ta.value;
+            });
+
+            // 3. Sinkronisasi elemen select
+            document.querySelectorAll("select").forEach(sel => {
+                Array.from(sel.options).forEach(opt => {
+                    if (opt.value === sel.value) {
+                        opt.setAttribute("selected", "selected");
+                    } else {
+                        opt.removeAttribute("selected");
+                    }
+                });
+            });
+
+            // 4. Perbarui seluruh sel agar menampilkan hasil & rumus siswa
+            Object.keys(userGrid).forEach(cellId => {
+                updateCellDisplay(cellId);
+            });
+        }
+
+        function saveToDriveAndPrint() {
+            const name = document.getElementById("studentName").value.trim();
+            const cls = document.getElementById("studentClass").value.trim();
+
+            if (!name || !cls) {
+                showToastNotice("Mohon isi Nama Lengkap dan Kelas Anda terlebih dahulu!");
+                document.getElementById("studentName").focus();
+                return;
+            }
+
+            // 1. Jalankan kalkulasi & evaluasi nilai otomatis
+            const currentScore = checkAnswers();
+
+            // 2. Siapkan seluruh elemen input agar nilai dan rumus terekam 100% pada dokumen PDF
+            prepareInputsForPrint();
+
+            // 3. Pastikan kartu nilai terbuka
+            const resultCard = document.getElementById("resultCard");
+            resultCard.classList.remove("hidden");
+
+            showToastNotice("Memproses dokumen PDF... Dialog cetak otomatis segera terbuka!");
+
+            // 4. Jika Web App Google Apps Script dikonfigurasi, kirimkan rekap data otomatis ke Drive
+            if (scriptDriveUrl) {
+                const payload = {
+                    timestamp: new Date().toISOString(),
+                    studentName: name,
+                    studentClass: cls,
+                    pcNumber: document.getElementById("studentPC").value,
+                    date: document.getElementById("praktikumDate").value,
+                    score: currentScore,
+                    goldRuleConclusion: document.getElementById("goldRuleAnswer").value,
+                    userGrid: userGrid,
+                    understandingScore: selectedUnderstandingScore,
+                    reflectInteresting: document.getElementById("reflectInteresting").value,
+                    reflectDifficult: document.getElementById("reflectDifficult").value
+                };
+
+                fetch(scriptDriveUrl, {
+                    method: "POST",
+                    mode: "no-cors",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                }).catch(err => console.log("Proses pengiriman Drive:", err));
+            }
+
+            // 5. Otomatis panggil dialog Cetak / Simpan PDF Browser
+            setTimeout(() => {
+                window.print();
+            }, 350);
+        }
+
+        function copyAppsScriptCode() {
+            const code = document.getElementById("gasCodeSnippet").innerText;
+            const tempInput = document.createElement("textarea");
+            tempInput.value = code;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+            showToastNotice("Kode Google Apps Script berhasil disalin!");
+        }
+
+        function showToastNotice(msg) {
+            const div = document.createElement("div");
+            div.className = "fixed top-5 right-5 bg-slate-900 text-white text-xs px-4 py-3 rounded-xl shadow-2xl z-50 flex items-center gap-2 border border-slate-700";
+            div.innerHTML = `<i class="fa-solid fa-circle-info text-amber-400"></i> ${msg}`;
+            document.body.appendChild(div);
+            setTimeout(() => div.remove(), 4000);
+        }
+
+        // Modal Controls
+        function toggleDriveModal() {
+            const modal = document.getElementById("driveModal");
+            modal.classList.toggle("hidden");
+            modal.classList.toggle("flex");
+        }
+
+        function saveDriveSettings() {
+            const url = document.getElementById("driveScriptUrl").value.trim();
+            scriptDriveUrl = url;
+            localStorage.setItem("excel_lkpd_drive_url", url);
+            toggleDriveModal();
+            showToastNotice("URL Google Drive Web App berhasil disimpan!");
+        }
+
+        function toggleHelpModal() {
+            const modal = document.getElementById("helpModal");
+            modal.classList.toggle("hidden");
+            modal.classList.toggle("flex");
+        }
+
+        function openResetModal() {
+            const modal = document.getElementById("resetModal");
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+        }
+
+        function closeResetModal() {
+            const modal = document.getElementById("resetModal");
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        }
+
+        function confirmResetWorksheet() {
+            userGrid = {};
+            document.getElementById("goldRuleAnswer").value = "";
+            document.getElementById("expInput1").value = "10 + 5";
+            document.getElementById("expInput2").value = "=10 + 5";
+            runExp1();
+            runExp2();
+
+            document.getElementById("act3_q1").value = "";
+            document.getElementById("act3_q2").value = "";
+            document.getElementById("act3_q3").value = "";
+            document.getElementById("act3_q4").value = "";
+
+            selectUnderstanding(0);
+            document.getElementById("reflectInteresting").value = "";
+            document.getElementById("reflectDifficult").value = "";
+
+            renderSpreadsheet();
+            document.getElementById("resultCard").classList.add("hidden");
+            closeResetModal();
+            selectCell("E4");
+        }
+    </script>
 </body>
 </html>
