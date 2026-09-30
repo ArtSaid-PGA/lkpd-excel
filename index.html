@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LKPD Interaktif Informatika - Pengolahan Data Excel Dasar</title>
+  
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- html2pdf.js Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <!-- Bootstrap 5 JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <style>
+    :root {
+      --excel-green: #107c41;
+      --excel-dark: #0b552c;
+      --excel-light: #f1f8f4;
+    }
+
+    body {
+      background-color: #eef2f5;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: #333;
+      padding-bottom: 80px;
+    }
+
+    .main-container {
+      max-width: 960px;
+      margin: 24px auto;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      padding: 32px;
+    }
+
+    /* Header Banner Original */
+    .header-banner {
+      background: linear-gradient(135deg, var(--excel-green), var(--excel-dark));
+      color: white;
+      padding: 28px;
+      border-radius: 12px;
+      margin-bottom: 28px;
+      box-shadow: 0 4px 14px rgba(16, 124, 65, 0.25);
+    }
+
+    .card-activity {
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      margin-bottom: 28px;
+      background: #ffffff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+      overflow: hidden;
+    }
+
+    .card-activity .card-header {
+      background-color: var(--excel-light);
+      border-bottom: 2px solid #d0e7d8;
+      font-weight: 700;
+      color: var(--excel-dark);
+      padding: 16px 24px;
+    }
+
+    /* Spreadsheet Simulator */
+    .excel-table-container {
+      overflow-x: auto;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      margin: 16px 0;
+    }
+
+    .excel-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      background: white;
+    }
+
+    .excel-table th, .excel-table td {
+      border: 1px solid #cbd5e1;
+      padding: 10px 14px;
+      text-align: center;
+    }
+
+    .excel-table th {
+      background-color: #f1f5f9;
+      color: #475569;
+      font-weight: 700;
+    }
+
+    .excel-table th.row-header {
+      background-color: #e2e8f0;
+      width: 45px;
+    }
+
+    .excel-cell-target {
+      background-color: #fef9c3;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-weight: 600;
+    }
+
+    .excel-cell-target.active {
+      outline: 2px solid var(--excel-green);
+      background-color: #dcfce7 !important;
+    }
+
+    .formula-bar-container {
+      display: flex;
+      align-items: center;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 8px 16px;
+      margin-bottom: 16px;
+    }
+
+    .formula-fx {
+      font-weight: 800;
+      font-style: italic;
+      color: var(--excel-green);
+      margin-right: 14px;
+      font-size: 18px;
+    }
+
+    .formula-input {
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-weight: 700;
+    }
+
+    .formula-tag-print {
+      display: block;
+      font-size: 11px;
+      font-family: 'Consolas', monospace;
+      color: #166534;
+      background: #dcfce7;
+      border-radius: 4px;
+      padding: 2px 6px;
+      margin-top: 4px;
+      font-weight: normal;
+    }
+
+    .reflection-emoji {
+      font-size: 32px;
+      cursor: pointer;
+      filter: grayscale(80%);
+      transition: transform 0.2s, filter 0.2s;
+    }
+
+    .reflection-emoji:hover, .reflection-emoji.selected {
+      filter: grayscale(0%);
+      transform: scale(1.25);
+    }
+
+    /* Floating Action Bar */
+    .action-bar-bottom {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 900px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid #bbf7d0;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+      padding: 14px 28px;
+      border-radius: 50px;
+      z-index: 1000;
+    }
+
+    /* SPECIFIC PRINT / PDF FORMATTING RULES */
+    body.pdf-export-mode {
+      background: #ffffff !important;
+      padding: 0 !important;
+    }
+
+    body.pdf-export-mode .main-container {
+      box-shadow: none !important;
+      max-width: 100% !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+
+    body.pdf-export-mode .no-pdf,
+    body.pdf-export-mode .action-bar-bottom,
+    body.pdf-export-mode .formula-bar-container,
+    body.pdf-export-mode button,
+    body.pdf-export-mode .btn {
+      display: none !important;
+    }
+
+    body.pdf-export-mode .card-activity {
+      break-inside: avoid !important;
+      page-break-inside: avoid !important;
+      margin-bottom: 20px !important;
+      border: 1px solid #cbd5e1 !important;
+    }
+
+    body.pdf-export-mode input[type="text"],
+    body.pdf-export-mode input[type="date"],
+    body.pdf-export-mode textarea {
+      border: none !important;
+      border-bottom: 1px dashed #64748b !important;
+      background: transparent !important;
+      padding: 4px 0 !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container main-container" id="lkpd-container">
+  
+  <!-- Header Banner Original -->
+  <div class="header-banner">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <span class="badge bg-light text-success fw-bold px-3 py-2">INFORMATIKA SMA FASE E</span>
+      <div class="no-pdf">
+        <button class="btn btn-sm btn-outline-light me-2" onclick="openDriveModal()"><i class="fa-solid fa-gear me-1"></i> Pengaturan Drive</button>
+        <button class="btn btn-sm btn-light text-success fw-bold" onclick="resetForm()"><i class="fa-solid fa-rotate-left me-1"></i> Reset</button>
+      </div>
+    </div>
+    <h2 class="fw-bold m-0"><i class="fa-regular fa-file-excel me-2"></i>LKPD Interaktif: Formula & Rumus Dasar Excel</h2>
+    <p class="m-0 mt-2 opacity-90"><i class="fa-solid fa-bookmark me-1"></i> Elemen: Analisis Data (AD) | Topik: Aturan Emas Excel, SUM, AVERAGE, MAX, & MIN</p>
+  </div>
+
+  <!-- Identitas Peserta Didik -->
+  <div class="card card-activity p-4">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label fw-bold"><i class="fa-solid fa-user text-primary me-1"></i> Nama Lengkap Siswa:</label>
+        <input type="text" class="form-control" id="studentName" placeholder="Ketik nama lengkap Anda...">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-bold"><i class="fa-solid fa-users text-primary me-1"></i> Kelas:</label>
+        <input type="text" class="form-control" id="studentClass" placeholder="Contoh: X.1 / X.2">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-bold"><i class="fa-solid fa-desktop text-primary me-1"></i> No. Komputer / Lab:</label>
+        <input type="text" class="form-control" id="pcNumber" placeholder="Contoh: LAB-05">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-bold"><i class="fa-solid fa-calendar-day text-primary me-1"></i> Tanggal Praktikum:</label>
+        <input type="date" class="form-control" id="pracDate">
+      </div>
+    </div>
+  </div>
+
+  <!-- AKTIVITAS 1 -->
+  <div class="card card-activity">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span><i class="fa-solid fa-flask me-2 text-success"></i>Aktivitas 1: Uji Coba "Aturan Emas Excel"</span>
+      <span class="badge bg-success">Bobot: 10 Poin</span>
+    </div>
+    <div class="card-body">
+      <p class="text-muted small mb-3">Cobalah mengetik eksperimen di bawah ini pada Excel untuk memahami perbedaan teks biasa dengan formula.</p>
+      
+      <div class="table-responsive">
+        <table class="table table-bordered align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Percobaan Input</th>
+              <th>Hasil Tampilan Excel</th>
+              <th>Analisis Sistem Excel</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>10+5</code> (Tanpa tanda <code>=</code>)</td>
+              <td><span class="badge bg-secondary">10+5</span></td>
+              <td class="small text-muted">Dianggap sebagai <b>Teks Biasa</b>.</td>
+            </tr>
+            <tr>
+              <td><code>=10+5</code> (Diawali tanda <code>=</code>)</td>
+              <td><span class="badge bg-success">15</span></td>
+              <td class="small text-success fw-bold">Dihitung otomatis sebagai <b>Formula</b>.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mt-3">
+        <label class="form-label fw-bold">Kesimpulan Anda: Tanda sama dengan (=) pada Excel berfungsi untuk...</label>
+        <textarea class="form-control" id="act1_conclusion" rows="2" placeholder="Tuliskan kesimpulan Anda di sini..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- AKTIVITAS 2 -->
+  <div class="card card-activity">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span><i class="fa-solid fa-table-cells me-2 text-success"></i>Aktivitas 2: Simulation Spreadsheet Rekapitulasi Nilai</span>
+      <span class="badge bg-success">Bobot: 50 Poin</span>
+    </div>
+    <div class="card-body">
+      <p class="text-muted small">Pilih sel target (berwarna kuning), ketik rumus di Formula Bar, lalu klik tombol <b>"Cek Sintaks Sel Ini"</b> untuk memverifikasi rumus per sel secara langsung!</p>
+      
+      <!-- Formula Bar -->
+      <div class="formula-bar-container no-pdf">
+        <span class="formula-fx">fx</span>
+        <span class="badge bg-dark me-2" id="activeCellLabel">E4</span>
+        <input type="text" class="form-control formula-input me-2" id="formulaInput" placeholder="Ketik rumus di sini (Contoh: =C4+D4)..." onkeyup="handleFormulaTyping(event)">
+        <button class="btn btn-sm btn-outline-success fw-bold text-nowrap me-1" onclick="checkActiveCellSyntax()"><i class="fa-solid fa-circle-check me-1"></i> Cek Sintaks Sel Ini</button>
+        <button class="btn btn-sm btn-outline-primary text-nowrap" onclick="applyAutoFill()"><i class="fa-solid fa-arrows-down-to-line me-1"></i> Auto-Fill (E4:E7)</button>
+      </div>
+      <div id="syntaxFeedback" class="mb-3 no-pdf"></div>
+
+      <!-- Simulator Spreadsheet -->
+      <div class="excel-table-container">
+        <table class="excel-table">
+          <thead>
+            <tr>
+              <th class="row-header"></th>
+              <th>A</th>
+              <th>B</th>
+              <th>C</th>
+              <th>D</th>
+              <th>E</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="row-header">3</td>
+              <td class="fw-bold">No</td>
+              <td class="fw-bold">Nama Siswa</td>
+              <td class="fw-bold">Nilai UH 1</td>
+              <td class="fw-bold">Nilai UH 2</td>
+              <td class="fw-bold">Total Nilai</td>
+            </tr>
+            <tr>
+              <td class="row-header">4</td>
+              <td>1</td>
+              <td>Andi</td>
+              <td>70</td>
+              <td>80</td>
+              <td class="excel-cell-target active" id="cell_E4" onclick="selectCell('E4')"><span class="cell-val">-</span><div class="cell-tag"></div></td>
+            </tr>
+            <tr>
+              <td class="row-header">5</td>
+              <td>2</td>
+              <td>Budi</td>
+              <td>85</td>
+              <td>90</td>
+              <td class="excel-cell-target" id="cell_E5" onclick="selectCell('E5')"><span class="cell-val">-</span><div class="cell-tag"></div></td>
+            </tr>
+            <tr>
+              <td class="row-header">6</td>
+              <td>3</td>
+              <td>Citra</td>
+              <td>60</td>
+              <td>75</td>
+              <td class="excel-cell-target" id="cell_E6" onclick="selectCell('E6')"><span class="cell-val">-</span><div class="cell-tag"></div></td>
+            </tr>
+            <tr>
+              <td class="row-header">7</td>
+              <td>4</td>
+              <td>Dewi</td>
+              <td>90</td>
+              <td>95</td>
+              <td class="excel-cell-target" id="cell_E7" onclick="selectCell('E7')"><span class="cell-val">-</span><div class="cell-tag"></div></td>
+            </tr>
+            <tr>
+              <td class="row-header">8</td>
+              <td colspan="2" class="fw-bold text-start ps-3">Rata-Rata Kelas</td>
+              <td class="excel-cell-target" id="cell_C8" onclick="selectCell('C8')"><span class="cell-val">-</span><div class="cell-tag"></div></td>
+              <td class="excel-cell-target" id="cell_D8" onclick="selectCell('D8')"><span class="cell-val">-</span><div class="cell-tag"></div></td>
+              <td class="bg-light"></td>
+            </tr>
+            <tr>
+              <td class="row-header">9</td>
+              <td colspan="2" class="fw-bold text-start ps-3">Nilai Tertinggi</td>
+              <td class="excel-cell-target" id="cell_C9" onclick="selectCell('C9')"><span class="cell-val">-</span><div class="cell-tag"></div></td>
+              <td class="excel-cell-target" id="cell_D9" onclick="selectCell('D9')"><span class="cell-val">-</span><div class="cell-tag"></div></td>
+              <td class="bg-light"></td>
+            </tr>
+            <tr>
+              <td class="row-header">10</td>
+              <td colspan="2" class="fw-bold text-start ps-3">Nilai Terendah</td>
+              <td class="excel-cell-target" id="cell_C10" onclick="selectCell('C10')"><span class="cell-val">-</span><div class="cell-tag"></div></td>
+              <td class="excel-cell-target" id="cell_D10" onclick="selectCell('D10')"><span class="cell-val">-</span><div class="cell-tag"></div></td>
+              <td class="bg-light"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- AKTIVITAS 3 -->
+  <div class="card card-activity">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span><i class="fa-solid fa-bug me-2 text-danger"></i>Aktivitas 3: Detektif Error Excel (Menganalisis Rumus)</span>
+      <span class="badge bg-success">Bobot: 20 Poin</span>
+    </div>
+    <div class="card-body">
+      <div class="mb-3 p-3 bg-light rounded border">
+        <label class="form-label fw-bold">1. Budi mengetik rumus <code>=AVERAGE(C4-C7)</code> untuk menghitung rata-rata nilai, tetapi hasilnya Error. Di mana letak kesalahannya dan bagaimana penulisan rumus yang benar?</label>
+        <textarea class="form-control" id="act3_q1" rows="2" placeholder="Tuliskan analisis kesalahan dan rumus yang benar..."></textarea>
+      </div>
+
+      <div class="p-3 bg-light rounded border">
+        <label class="form-label fw-bold">2. Jika nilai UH 1 Andi (sel C4) diubah dari 70 menjadi 100, apa yang terjadi pada hasil sel Total Nilai (E4)? Jelaskan alasannya!</label>
+        <textarea class="form-control" id="act3_q2" rows="2" placeholder="Jelaskan perubahan yang terjadi dan alasannya..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- REFLEKSI SISWA -->
+  <div class="card card-activity">
+    <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
+      <span><i class="fa-solid fa-heart-pulse me-2"></i>Jurnal Refleksi Pemahaman Siswa</span>
+      <span class="badge bg-light text-primary">Bobot: 20 Poin</span>
+    </div>
+    <div class="card-body">
+      <div class="text-center mb-4">
+        <label class="form-label fw-bold d-block mb-2">Tingkat Pemahaman Pembelajaran Hari Ini:</label>
+        <div class="d-flex justify-content-center gap-4 align-items-center">
+          <span class="reflection-emoji" onclick="setRating(1, this)" title="Sangat Bingung">😠</span>
+          <span class="reflection-emoji" onclick="setRating(2, this)" title="Kurang Paham">🙁</span>
+          <span class="reflection-emoji selected" onclick="setRating(3, this)" title="Cukup Paham">😐</span>
+          <span class="reflection-emoji" onclick="setRating(4, this)" title="Paham">🙂</span>
+          <span class="reflection-emoji" onclick="setRating(5, this)" title="Sangat Menguasai">🤩</span>
+        </div>
+        <input type="hidden" id="reflectionRating" value="3">
+      </div>
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label fw-bold">Materi/Rumus apa yang paling menarik bagi Anda hari ini?</label>
+          <textarea class="form-control" id="ref_interesting" rows="2" placeholder="Tuliskan bagian favorit Anda..."></textarea>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-bold">Apa bagian paling sulit/menantang yang Anda hadapi?</label>
+          <textarea class="form-control" id="ref_difficult" rows="2" placeholder="Tuliskan kendala Anda..."></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KARTU REKAP NILAI -->
+  <div class="card card-activity border-success" id="resultCard" style="display: none;">
+    <div class="card-header bg-success text-white fw-bold">
+      <i class="fa-solid fa-award me-2"></i>Hasil Evaluasi & Rekapitulasi Nilai LKPD
+    </div>
+    <div class="card-body text-center">
+      <h6 class="text-muted m-0">TOTAL SKOR AKHIR:</h6>
+      <h1 class="display-3 fw-bold text-success my-1" id="finalScoreDisplay">0 / 100</h1>
+      <span id="gradePredicate" class="badge fs-6 bg-info">Sangat Baik</span>
+      <div id="scoreFeedbackList" class="text-start mt-3 p-3 bg-light rounded border small"></div>
+    </div>
+  </div>
+
+  <!-- Floating Action Bar Bottom -->
+  <div class="action-bar-bottom d-flex justify-content-between align-items-center no-pdf">
+    <div>
+      <span class="fw-bold text-dark"><i class="fa-solid fa-circle-check text-success me-1"></i> Selesai Mengerjakan?</span>
+      <span class="text-muted small d-none d-md-inline"> Periksa nilai Anda lalu simpan berkas PDF tugas.</span>
+    </div>
+    <div class="d-flex gap-2">
+      <button class="btn btn-primary fw-bold px-3" onclick="checkAllAnswers()"><i class="fa-solid fa-calculator me-1"></i> 1. Cek & Hitung Nilai</button>
+      <button class="btn btn-success fw-bold px-4" id="btnSubmitAndPrint" onclick="exportAndSendPDF()"><i class="fa-solid fa-file-pdf me-1"></i> 2. Kirim PDF Ke Drive Guru</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal Drive Config -->
+<div class="modal fade no-pdf" id="driveConfigModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title fw-bold"><i class="fa-solid fa-cloud-arrow-up me-2"></i>Pengaturan Google Drive Guru</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <label class="form-label fw-bold">URL Web App Google Apps Script:</label>
+        <input type="text" class="form-control font-monospace mb-3" id="gasScriptUrl" placeholder="https://script.google.com/macros/s/.../exec">
+        <p class="small text-muted m-0">URL ini digunakan untuk mengirim otomatis berkas PDF siswa ke Folder Google Drive Anda.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-success fw-bold" onclick="saveDriveConfig()">Simpan URL</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // TEMPELKAN URL WEB APP GOOGLE APPS SCRIPT ANDA DI DI DALAM TANDA PETIK DI BAWAH INI
+  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxi2OpvANOhZYSIHsFp4eOly-FKNSo9ZBi9BicbUlGYIhyaYmoLLbkmeG4cKIRMlXMydg/exec";
+
+  const cellData = {
+    'E4': { formula: '', value: '-', expectedFormula: ['=C4+D4', '=SUM(C4:D4)'], expectedValue: 150 },
+    'E5': { formula: '', value: '-', expectedFormula: ['=C5+D5', '=SUM(C5:D5)'], expectedValue: 175 },
+    'E6': { formula: '', value: '-', expectedFormula: ['=C6+D6', '=SUM(C6:D6)'], expectedValue: 135 },
+    'E7': { formula: '', value: '-', expectedFormula: ['=C7+D7', '=SUM(C7:D7)'], expectedValue: 185 },
+    'C8': { formula: '', value: '-', expectedFormula: ['=AVERAGE(C4:C7)'], expectedValue: 76.25 },
+    'D8': { formula: '', value: '-', expectedFormula: ['=AVERAGE(D4:D7)'], expectedValue: 85 },
+    'C9': { formula: '', value: '-', expectedFormula: ['=MAX(C4:C7)'], expectedValue: 90 },
+    'D9': { formula: '', value: '-', expectedFormula: ['=MAX(D4:D7)'], expectedValue: 95 },
+    'C10': { formula: '', value: '-', expectedFormula: ['=MIN(C4:C7)'], expectedValue: 60 },
+    'D10': { formula: '', value: '-', expectedFormula: ['=MIN(D4:D7)'], expectedValue: 75 }
+  };
+
+  let activeCellId = 'E4';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('pracDate').valueAsDate = new Date();
+    selectCell('E4');
+    if (GAS_WEB_APP_URL && GAS_WEB_APP_URL !== "PASTE_URL_WEB_APP_AKHIRAN_EXEC_DI_SINI") {
+      document.getElementById('gasScriptUrl').value = GAS_WEB_APP_URL;
+    }
+  });
+
+  function selectCell(cellId) {
+    document.querySelectorAll('.excel-cell-target').forEach(el => el.classList.remove('active'));
+    activeCellId = cellId;
+    
+    const cellEl = document.getElementById(`cell_${cellId}`);
+    if (cellEl) cellEl.classList.add('active');
+
+    document.getElementById('activeCellLabel').innerText = cellId;
+    document.getElementById('formulaInput').value = cellData[cellId].formula || '';
+    document.getElementById('syntaxFeedback').innerHTML = '';
+  }
+
+  function handleFormulaTyping(e) {
+    cellData[activeCellId].formula = e.target.value.trim();
+    if (e.key === 'Enter') checkActiveCellSyntax();
+  }
+
+  function checkActiveCellSyntax() {
+    const cell = cellData[activeCellId];
+    const formula = (cell.formula || '').toUpperCase().replace(/\s+/g, '');
+    const feedback = document.getElementById('syntaxFeedback');
+
+    if (!formula.startsWith('=')) {
+      feedback.innerHTML = `<span class="badge bg-danger p-2"><i class="fa-solid fa-circle-xmark me-1"></i> Lupa tanda sama dengan (=)!</span>`;
+      return false;
+    }
+
+    const isValid = cell.expectedFormula.some(exp => exp.toUpperCase().replace(/\s+/g, '') === formula);
+    if (isValid) {
+      cell.value = cell.expectedValue;
+      updateCellDisplay(activeCellId);
+      feedback.innerHTML = `<span class="badge bg-success p-2"><i class="fa-solid fa-circle-check me-1"></i> Rumus Benar! Hasil: ${cell.expectedValue}</span>`;
+      return true;
+    } else {
+      feedback.innerHTML = `<span class="badge bg-warning text-dark p-2"><i class="fa-solid fa-triangle-exclamation me-1"></i> Sintaks belum tepat. Periksa acuan sel.</span>`;
+      return false;
+    }
+  }
+
+  function updateCellDisplay(cellId) {
+    const cellEl = document.getElementById(`cell_${cellId}`);
+    if (cellEl) {
+      const valSpan = cellEl.querySelector('.cell-val');
+      const tagDiv = cellEl.querySelector('.cell-tag');
+      if (valSpan) valSpan.innerHTML = cellData[cellId].value !== '-' ? `<b>${cellData[cellId].value}</b>` : '-';
+      if (tagDiv) {
+        tagDiv.innerHTML = cellData[cellId].formula ? `<div class="formula-tag-print">fx: ${cellData[cellId].formula}</div>` : '';
+      }
+    }
+  }
+
+  function applyAutoFill() {
+    ['E4','E5','E6','E7'].forEach((id, idx) => {
+      const row = 4 + idx;
+      cellData[id].formula = `=C${row}+D${row}`;
+      cellData[id].value = cellData[id].expectedValue;
+      updateCellDisplay(id);
+    });
+    selectCell('E7');
+    document.getElementById('syntaxFeedback').innerHTML = `<span class="badge bg-info text-dark p-2"><i class="fa-solid fa-arrows-down-to-line me-1"></i> Auto-Fill berhasil diterapkan E4:E7!</span>`;
+  }
+
+  function setRating(val, el) {
+    document.getElementById('reflectionRating').value = val;
+    document.querySelectorAll('.reflection-emoji').forEach(e => e.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+
+  function checkAllAnswers() {
+    let score = 0;
+    let feedback = [];
+
+    if (document.getElementById('act1_conclusion').value.trim().length > 5) {
+      score += 10;
+      feedback.push('✔ <b>Aktivitas 1 (10/10):</b> Kesimpulan Aturan Emas Excel terisi.');
+    } else {
+      feedback.push('❌ <b>Aktivitas 1 (0/10):</b> Kesimpulan belum diisi.');
+    }
+
+    let act2Score = 0;
+    Object.keys(cellData).forEach(id => {
+      const cell = cellData[id];
+      const form = (cell.formula || '').toUpperCase().replace(/\s+/g, '');
+      if (cell.expectedFormula.some(exp => exp.toUpperCase().replace(/\s+/g, '') === form)) {
+        act2Score += 5;
+        cell.value = cell.expectedValue;
+        updateCellDisplay(id);
+      }
+    });
+    score += act2Score;
+    feedback.push(`✔️ <b>Aktivitas 2 (${act2Score}/50):</b> Menyelesaikan ${act2Score/5} dari 10 sel rumus.`);
+
+    let act3Score = 0;
+    if (document.getElementById('act3_q1').value.trim().length > 5) act3Score += 10;
+    if (document.getElementById('act3_q2').value.trim().length > 5) act3Score += 10;
+    score += act3Score;
+    feedback.push(`✔️ <b>Aktivitas 3 (${act3Score}/20):</b> Analisis error dan kasus dinamis terisi.`);
+
+    let refScore = 0;
+    if (document.getElementById('ref_interesting').value.trim().length > 3) refScore += 10;
+    if (document.getElementById('ref_difficult').value.trim().length > 3) refScore += 10;
+    score += refScore;
+    feedback.push(`✔️️ <b>Refleksi (${refScore}/20):</b> Jurnal refleksi terisi.`);
+
+    document.getElementById('resultCard').style.display = 'block';
+    document.getElementById('finalScoreDisplay').innerText = `${score} / 100`;
+    document.getElementById('scoreFeedbackList').innerHTML = feedback.join('<br>');
+    
+    const pred = document.getElementById('gradePredicate');
+    if (score >= 85) { pred.className = 'badge fs-6 bg-success'; pred.innerText = 'Sangat Baik (A)'; }
+    else if (score >= 75) { pred.className = 'badge fs-6 bg-primary'; pred.innerText = 'Baik (B)'; }
+    else if (score >= 60) { pred.className = 'badge fs-6 bg-warning text-dark'; pred.innerText = 'Cukup (C)'; }
+    else { pred.className = 'badge fs-6 bg-danger'; pred.innerText = 'Perlu Bimbingan (D)'; }
+
+    return score;
+  }
+
+  async function exportAndSendPDF() {
+    const studentName = document.getElementById('studentName').value.trim();
+    const studentClass = document.getElementById('studentClass').value.trim();
+
+    if (!studentName || !studentClass) {
+      alert('Harap isi Nama Siswa dan Kelas terlebih dahulu!');
+      document.getElementById('studentName').focus();
+      return;
+    }
+
+    checkAllAnswers();
+
+    const btn = document.getElementById('btnSubmitAndPrint');
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-2"></i> Mengirim ke Drive & Mengunduh PDF...`;
+
+    document.body.classList.add('pdf-export-mode');
+
+    const element = document.getElementById('lkpd-container');
+    const safeName = studentName.replace(/[^a-zA-Z0-9]/g, '_');
+    const safeClass = studentClass.replace(/[^a-zA-Z0-9]/g, '_');
+    const filename = `LKPD_Excel_${safeName}_${safeClass}.pdf`;
+
+    const opt = {
+      margin:       [10, 10, 10, 10],
+      filename:     filename,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true, logging: false },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+    };
+
+    try {
+      const worker = html2pdf().set(opt).from(element);
+      const pdfBase64 = await worker.outputPdf('datauristring');
+
+      const targetUrl = GAS_WEB_APP_URL !== "PASTE_URL_WEB_APP_AKHIRAN_EXEC_DI_SINI" ? GAS_WEB_APP_URL : (localStorage.getItem('gas_web_app_url') || document.getElementById('gasScriptUrl').value.trim());
+
+      if (targetUrl) {
+        await fetch(targetUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            filename: filename,
+            studentName: studentName,
+            studentClass: studentClass,
+            pdfBase64: pdfBase64
+          })
+        });
+      }
+
+      await worker.save();
+      alert('Berhasil! Lembar kerja telah dikirim ke Google Drive dan salinan PDF diunduh.');
+    } catch (err) {
+      console.error('PDF Error:', err);
+      alert('Terjadi kendala saat menyimpan PDF. Silakan coba lagi.');
+    } finally {
+      document.body.classList.remove('pdf-export-mode');
+      btn.disabled = false;
+      btn.innerHTML = `<i class="fa-solid fa-file-pdf me-1"></i> 2. Kirim PDF Ke Drive Guru`;
+    }
+  }
+
+  function openDriveModal() {
+    const modalEl = document.getElementById('driveConfigModal');
+    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+      const modal = new bootstrap.Modal(modalEl);
+      modal.show();
+    } else {
+      alert('Bootstrap JS belum terload sempurna.');
+    }
+  }
+
+  function saveDriveConfig() {
+    const url = document.getElementById('gasScriptUrl').value.trim();
+    localStorage.setItem('gas_web_app_url', url);
+    alert('URL Google Apps Script berhasil disimpan!');
+    const modalEl = document.getElementById('driveConfigModal');
+    const modalInstance = bootstrap.Modal.getInstance(modalEl);
+    if (modalInstance) modalInstance.hide();
+  }
+
+  function resetForm() {
+    if (confirm('Apakah Anda yakin ingin mereset lembar kerja ini?')) location.reload();
+  }
+</script>
+</body>
+</html>
